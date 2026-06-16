@@ -1,0 +1,35 @@
+<% layout("layouts/boilerplate.ejs") %>
+<%
+    const fallbackImage = "https://static.vecteezy.com/system/resources/thumbnails/057/068/323/small/single-fresh-red-strawberry-on-table-green-background-food-fruit-sweet-macro-juicy-plant-image-photo.jpg";
+    const imageUrl = listed.image && listed.image.url ? listed.image.url : fallbackImage;
+    const price = Number(listed.price);
+    const hasPrice = Number.isFinite(price) && price > 0;
+%>
+
+<section class="show-listing">
+    <img src="<%= imageUrl %>" class="show-listing-img" alt="<%= listed.title || 'Listing image' %>">
+    <div class="show-listing-content">
+        <p class="section-kicker">Listing details</p>
+        <h1><%= listed.title || "Untitled listing" %></h1>
+        <p><%= listed.description || "No description available." %></p>
+        <ul class="show-listing-meta">
+            <li>
+                <strong>Price:</strong>
+                <% if (hasPrice) { %>
+                    &#8377; <%= price.toLocaleString("en-IN") %> / night
+                <% } else { %>
+                    Not added
+                <% } %>
+            </li>
+            <li><strong>Location:</strong> <%= listed.location || "Not added" %></li>
+            <li><strong>Country:</strong> <%= listed.country || "Not added" %></li>
+        </ul>
+        <a href="/listings/<%= listed._id %>/edit" class="btn btn-dark">Edit listing</a>
+    </div>
+</section>
+
+<div class="mt-3">
+    <form action="/listings/<%= listed._id %>?_method=DELETE" method="post">
+        <button class="btn btn-outline-danger">Delete listing</button>
+    </form>
+</div>
