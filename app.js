@@ -5,6 +5,13 @@ const Listing =require("./models/listing.js");
 const path =require("path");
 const methodOverride=require("method-override")
 const ejsMate=require("ejs-mate");
+const asyncHandler = require("./utils/asyncHandler");
+const errorHandler = require("./middleware/errorHandler");
+const { validateListing } = require("./middleware/validateListing");
+const { validateIdAndListing } = require("./middleware/validateIdAndListing");
+
+
+
 
 main().then(()=>{
     console.log("db connected");
@@ -43,51 +50,90 @@ app.get("/",(req,res)=>{
 //         res.send("successful testing");
 // });
 
-app.get("/listings",async (req,res)=>{
+app.get("/listings", asyncHandler(async (req, res) => {
     const allListings = await Listing.find({});
-    res.render("listings/index.ejs",{allListings});
-})
+    res.render("listings/index.ejs", { allListings });
+}));
 
-app.get("/listings/new",(req,res)=>{
+
+app.get("/listings/new", (req, res) => {
     res.render("listings/new.ejs");
-})
+});
 
 
-app.post("/listings",async (req,res)=>{
+
+app.post("/listings", validateListing, asyncHandler(async (req, res) => {
     const newListing = new Listing(req.body.listing);
+
     await newListing.save();
     res.redirect("/listings");
-})
+}));
 
-app.get("/listings/:id/edit",async (req,res)=>{
-    let {id} =req.params;
-    const listed=await Listing.findById(id);
-    res.render("listings/edit.ejs",{listed});
-})
 
-app.put("/listings/:id",async (req,res)=>{
-    let {id} =req.params;
-    await Listing.findByIdAndUpdate(id,{...req.body.listing}); // spread operator it spread them out as key vals pair and changes by that fn
+app.get("/listings/:id/edit", validateIdAndListing, asyncHandler(async (req, res) => {
+    res.render("listings/edit.ejs", { listed: req.listed });
+}));
+
+
+
+app.put("/listings/:id", validateListing, asyncHandler(async (req, res) => {
+    let { id } = req.params;
+
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).render("error", { statusCode: 404, message: "Resource not found (invalid id)." });
+    }
+
+    const updatedListing = await Listing.findByIdAndUpdate(
+        id,
+        { ...req.body.listing },
+        { runValidators: true, new: true }
+    );
+
+    if (!updatedListing) {
+        return res.status(404).render("error", { statusCode: 404, message: "Listing not found." });
+    }
+
     res.redirect(`/listings/${id}`);
-})
+}));
 
-app.delete("/listings/:id",async (req,res)=>{
-    let {id} =req.params;
-    await Listing.findByIdAndDelete(id);
+
+app.delete("/listings/:id", asyncHandler(async (req, res) => {
+    let { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).render("error", { statusCode: 404, message: "Resource not found (invalid id)." });
+    }
+
+    const deleted = await Listing.findByIdAndDelete(id);
+    if (!deleted) {
+        return res.status(404).render("error", { statusCode: 404, message: "Listing not found." });
+    }
+
     res.redirect("/listings");
-})
+}));
+
+app.get("/listings/:id", validateIdAndListing, asyncHandler(async (req, res) => {
+    res.render("listings/show.ejs", { listed: req.listed });
+}));
+
+// 404 handler for any unknown route
+app.use((req, res) => {
+    res.status(404).render("error", {
+        statusCode: 404,
+        message: "Page not found.",
+    });
+});
 
 
 
-app.get("/listings/:id",async (req,res)=>{
-    let {id} =req.params;
-    const listed=await Listing.findById(id);
-    res.render("listings/show.ejs",{listed});
-})
 
 
+app.use(errorHandler);
 
-app.listen(8080,()=>{
+app.listen(8080, () => {
     console.log("server is listining to port 8080");
-})
+});
+
+
 

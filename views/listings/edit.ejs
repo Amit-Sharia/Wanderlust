@@ -5,8 +5,10 @@
 
 <section class="form-shell">
     <h1>Edit listing</h1>
-    <form action="/listings/<%= listed._id %>?_method=PUT" method="post" class="listing-form">
+    <form action="/listings/<%= listed._id %>?_method=PUT" method="post" class="listing-form needs-validation" novalidate>
+
         <input class="form-control" name="listing[title]" type="text" value="<%= listed.title || '' %>" required>
+
         <textarea class="form-control" name="listing[description]" rows="4"><%= listed.description || "" %></textarea>
         <input class="form-control" name="listing[image][url]" type="url" value="<%= imageUrl %>">
         <input class="form-control" name="listing[price]" type="number" min="0" value="<%= listed.price || '' %>">
