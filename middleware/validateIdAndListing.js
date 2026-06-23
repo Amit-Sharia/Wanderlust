@@ -12,6 +12,7 @@ function validateIdAndListing(req, res, next) {
   }
 
   return Listing.findById(id)
+    .populate('reviews')
     .then((listed) => {
       if (!listed) {
         return res.status(404).render('error', { statusCode: 404, message: 'Listing not found.' });

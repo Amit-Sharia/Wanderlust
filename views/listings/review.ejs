@@ -1,0 +1,57 @@
+<% layout("layouts/boilerplate.ejs") %>
+
+<div class="col-8 offset-3">
+  <div class="form-shell">
+    <h1 class="mb-4">Leave a Review</h1>
+
+    <form class="listing-form needs-validation" action="/listings/<%= listed._id %>/reviews" method="post" novalidate>
+      <div class="mb-3">
+        <label for="rating" class="form-label">Rating</label>
+        <input
+          type="range"
+          class="form-range"
+          name="review[rating]"
+          id="rating"
+          min="1"
+          max="5"
+          step="1"
+          required
+        />
+        <div class="form-text">
+          Selected: <span id="ratingValue" class="fw-semibold">1</span> / 5
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="comment" class="form-label">Comments</label>
+        <textarea
+          class="form-control"
+          name="review[comment]"
+          id="comment"
+          cols="30"
+          rows="5"
+          required
+        ></textarea>
+        <div class="invalid-feedback">Please enter a comment.</div>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const rating = document.getElementById('rating');
+    const ratingValue = document.getElementById('ratingValue');
+    if (!rating || !ratingValue) return;
+
+    const update = () => {
+      ratingValue.textContent = rating.value;
+    };
+
+    rating.addEventListener('input', update);
+    update();
+  })();
+</script>
+

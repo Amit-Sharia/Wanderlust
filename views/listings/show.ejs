@@ -28,8 +28,43 @@
     </div>
 </section>
 
+<% if (typeof review !== 'undefined' && review === '1') { %>
+  <div class="alert alert-success" role="alert">
+    Review saved successfully.
+  </div>
+<% } %>
+
 <div class="mt-3">
     <form action="/listings/<%= listed._id %>?_method=DELETE" method="post">
         <button class="btn btn-outline-danger">Delete listing</button>
     </form>
 </div>
+
+<div class="mt-3">
+    <form action="/listings/<%= listed._id %>/reviews" method="get">
+        <button class="btn btn-outline-primary">Add Review</button>
+    </form>
+</div>
+
+<hr>
+
+<h4>All reviews</h4>
+<% if (!listed.reviews || listed.reviews.length === 0) { %>
+  <p>No reviews yet.</p>
+<% } else { %>
+  <div class="reviews">
+    <% for (let review of listed.reviews) { %>
+      <div class="review col-6 mb-2 p-2 border rounded">
+        <p class="mb-1"><strong>Name:</strong> Amit (default)</p>
+        <p class="mb-1"><strong>Rating:</strong> <%= review.rating %> / 5</p>
+        <p class="mb-0"><strong>Comment:</strong> <%= review.comment %></p>
+        <form action="/listings/<%= listed._id %>/reviews/<%= review._id %>?_method=DELETE" method="post">
+        <button class="btn btn-outline-danger">Delete</button>
+    </form>
+      </div>
+    <% } %>
+  </div>
+<% } %>
+
+
+
