@@ -6,12 +6,12 @@ const router = express.Router();
 // ======================
 const mongoose = require("mongoose");
 const Listing = require("../models/listing");
-const Review = require("../models/review");
 
 const asyncHandler = require("../utils/asyncHandler");
 
 const { validateListing } = require("../middleware/validateListing");
 const { validateIdAndListing } = require("../middleware/validateIdAndListing");
+const { isLoggedIn, isOwner } = require("../middleware/middleware");
 
 // ======================
 // Listings - Read
@@ -25,7 +25,7 @@ router.get(
   })
 );
 
-router.get("/new", (req, res) => {
+router.get("/new",isLoggedIn,(req, res) => {
   res.render("listings/new.ejs");
 });
 
@@ -33,10 +33,11 @@ router.get("/new", (req, res) => {
 // Listings - Create
 // ======================
 router.post(
-  "/",
+  "/",isLoggedIn,
   validateListing,
   asyncHandler(async (req, res) => {
     const newListing = new Listing(req.body.listing);
+    newListing.owner = req.user._id; // ensure owner is set for populated owner + relationships
     await newListing.save();
     req.flash("success","new listing created");
     res.redirect("/listings");
@@ -47,7 +48,7 @@ router.post(
 // Listings - Edit (form)
 // ======================
 router.get(
-  "/:id/edit",
+  "/:id/edit",isLoggedIn,isOwner,
   validateIdAndListing,
   asyncHandler(async (req, res) => {
     req.flash("success","listing edited");
@@ -59,7 +60,7 @@ router.get(
 // Listings - Update
 // ======================
 router.put(
-  "/:id",
+  "/:id",isLoggedIn,isOwner,
   validateListing,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -93,7 +94,7 @@ router.put(
 // Listings - Delete
 // ======================
 router.delete(
-  "/:id",
+  "/:id",isLoggedIn,isOwner,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
 
@@ -121,17 +122,29 @@ router.delete(
 // ======================
 router.get(
   "/:id",
-  // validateIdAndListing, just commenting the middlewaare so that flash can work
+  validateIdAndListing,
   asyncHandler(async (req, res) => {
-    // validateIdAndListing should populate req.listed when the listing exists
-    if (!req.listed) {
-      req.flash("error", "Listing does not exist");
-      return res.redirect("/listings");
+    const { id } = req.params;
+
+    // Always render using the Listing we fetched (ensures `listed` is present for show.ejs)
+    const listing = await Listing.findById(id)
+      .populate( {path :"reviews",
+        populate :{
+          path: "owner",
+      }})
+      .populate("owner");
+
+    if (!listing) {
+      return res.status(404).render("error", {
+        statusCode: 404,
+        message: "Listing not found.",
+      });
     }
 
-    res.render("listings/show.ejs", { listed: req.listed });
+    res.render("listings/show.ejs", { listed: listing });
   })
 );
+
 
 
 module.exports = router;

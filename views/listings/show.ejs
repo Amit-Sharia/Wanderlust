@@ -11,6 +11,11 @@
     <div class="show-listing-content">
         <p class="section-kicker">Listing details</p>
         <h1><%= listed.title || "Untitled listing" %></h1>
+        <i>
+          Owner :
+          <b><%= (listed.owner && listed.owner.username) ? listed.owner.username : "Unknown" %></b>
+        </i>
+        <br>
         <p><%= listed.description || "No description available." %></p>
         <ul class="show-listing-meta">
             <li>
@@ -24,7 +29,9 @@
             <li><strong>Location:</strong> <%= listed.location || "Not added" %></li>
             <li><strong>Country:</strong> <%= listed.country || "Not added" %></li>
         </ul>
+        <% if (currentUser && listed.owner && currentUser._id.equals(listed.owner._id)) { %>
         <a href="/listings/<%= listed._id %>/edit" class="btn btn-dark">Edit listing</a>
+        <% } %>
     </div>
 </section>
 
@@ -34,18 +41,20 @@
   </div>
 <% } %>
 
+<% if (currentUser && listed.owner && currentUser._id.equals(listed.owner._id)) { %>
 <div class="mt-3">
     <form action="/listings/<%= listed._id %>?_method=DELETE" method="post">
         <button class="btn btn-outline-danger">Delete listing</button>
     </form>
 </div>
-
+<% } %>
+<% if (currentUser) { %>
 <div class="mt-3">
     <form action="/listings/<%= listed._id %>/reviews" method="get">
         <button class="btn btn-outline-primary">Add Review</button>
     </form>
 </div>
-
+<% } %>
 <hr>
 
 <h4>All reviews</h4>
@@ -55,16 +64,20 @@
   <div class="reviews">
     <% for (let review of listed.reviews) { %>
       <div class="review col-6 mb-2 p-2 border rounded">
-        <p class="mb-1"><strong>Name:</strong> Amit (default)</p>
+        <p class="mb-1">
+          <strong>Owner:</strong>
+          <%= review.owner && review.owner.username ? review.owner.username : "Unknown" %>
+        </p>
         <p class="mb-1"><strong>Rating:</strong> <%= review.rating %> / 5</p>
         <p class="mb-0"><strong>Comment:</strong> <%= review.comment %></p>
+        <% if (currentUser && review.owner && currentUser._id.equals(review.owner._id)) { %>
         <form action="/listings/<%= listed._id %>/reviews/<%= review._id %>?_method=DELETE" method="post">
-        <button class="btn btn-outline-danger">Delete</button>
-    </form>
+          <button class="btn btn-outline-danger">Delete</button>
+        </form>
+        <% } %>
       </div>
     <% } %>
   </div>
 <% } %>
-
 
 

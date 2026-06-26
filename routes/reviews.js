@@ -10,12 +10,14 @@ const asyncHandler = require("../utils/asyncHandler");
 
 const { validateIdAndListing } = require("../middleware/validateIdAndListing");
 const { validateReview } = require("../middleware/validateReview");
+const { isLoggedIn, isReviewAuthor } = require("../middleware/middleware");
 
 // ======================
 // Reviews - Read (review form)
 // ======================
 router.get(
   "/:id/reviews",
+  isLoggedIn,
   validateIdAndListing,
   asyncHandler(async (req, res) => {
     res.render("listings/review.ejs", { listed: req.listed });
@@ -27,6 +29,7 @@ router.get(
 // ======================
 router.post(
   "/:id/reviews",
+  isLoggedIn,
   validateIdAndListing,
   validateReview,
   asyncHandler(async (req, res) => {
@@ -44,6 +47,7 @@ router.post(
     // Create review document
     const listing = await Listing.findById(id);
     const newReview = new Review(review);
+    newReview.owner =req.user._id;
 
     // Link + persist
     listing.reviews.push(newReview);
@@ -59,11 +63,21 @@ router.post(
 // ======================
 router.delete(
   "/:id/reviews/:reviewId",
+  isLoggedIn,
+  isReviewAuthor,
   asyncHandler(async (req, res) => {
     const { id, reviewId } = req.params;
 
-    await Review.findByIdAndDelete(reviewId);
+    // If review doesn't exist, don't crash
+    const deletedReview = await Review.findByIdAndDelete(reviewId);
+    if (!deletedReview) {
+      req.flash("error", "Review not found.");
+      return res.redirect(`/listings/${id}`);
+    }
+
+    // Remove review id from listing
     await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+
     req.flash("success","review deleted");
     res.redirect(`/listings/${id}`);
   })

@@ -10,6 +10,7 @@ async function main() {
 // remove the old data and add the new data from the data.js :)
 const initDB = async () => {
   await Listing.deleteMany({});
+  initData.data= initData.data.map((obj) =>({...obj , owner :"6a3c21e86015cbd7e8f2a876"}));
   await Listing.insertMany(initData.data);
   console.log("data was initialized");
 };
