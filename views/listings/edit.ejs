@@ -5,15 +5,18 @@
 
 <section class="form-shell">
     <h1>Edit listing</h1>
-    <form action="/listings/<%= listed._id %>?_method=PUT" method="post" class="listing-form needs-validation" novalidate>
+    <form action="/listings/<%= listed._id %>?_method=PUT" method="post" class="listing-form needs-validation" novalidate enctype="multipart/form-data">
 
-        <input class="form-control" name="listing[title]" type="text" value="<%= listed.title || '' %>" required>
+        <input class="form-control" name="title" type="text" value="<%= listed.title || '' %>" required>
 
-        <textarea class="form-control" name="listing[description]" rows="4"><%= listed.description || "" %></textarea>
-        <input class="form-control" name="listing[image][url]" type="url" value="<%= imageUrl %>">
-        <input class="form-control" name="listing[price]" type="number" min="0" value="<%= listed.price || '' %>">
-        <input class="form-control" name="listing[location]" type="text" value="<%= listed.location || '' %>">
-        <input class="form-control" name="listing[country]" type="text" value="<%= listed.country || '' %>">
+        <textarea class="form-control" name="description" rows="4"><%= listed.description || "" %></textarea>
+        <% if (imageUrl) { %>
+            <img src="<%= imageUrl %>" class="listing-img mb-2" alt="<%= listed.title || 'Current listing image' %>">
+        <% } %>
+        <input class="form-control" name="image" type="file" accept="image/*">
+        <input class="form-control" name="price" type="number" min="0" value="<%= listed.price || '' %>">
+        <input class="form-control" name="location" type="text" value="<%= listed.location || '' %>">
+        <input class="form-control" name="country" type="text" value="<%= listed.country || '' %>">
         <button class="btn btn-dark">Save changes</button>
     </form>
 </section>

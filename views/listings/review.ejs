@@ -5,21 +5,24 @@
     <h1 class="mb-4">Leave a Review</h1>
 
     <form class="listing-form needs-validation" action="/listings/<%= listed._id %>/reviews" method="post" novalidate>
-      <div class="mb-3">
-        <label for="rating" class="form-label">Rating</label>
-        <input
-          type="range"
-          class="form-range"
-          name="review[rating]"
-          id="rating"
-          min="1"
-          max="5"
-          step="1"
-          required
-        />
-        <div class="form-text">
-          Selected: <span id="ratingValue" class="fw-semibold">1</span> / 5
-        </div>
+      <div class="mb-3 rating-field">
+        <label class="form-label d-block">Rating</label>
+        <fieldset class="starability-coinFlip">
+          <legend class="visually-hidden">Choose a rating</legend>
+          <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" aria-label="No rating." required />
+          <input type="radio" id="first-rate1" name="review[rating]" value="1" required />
+          <label for="first-rate1" title="Terrible">1 star</label>
+          <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+          <label for="first-rate2" title="Not good">2 stars</label>
+          <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+          <label for="first-rate3" title="Average">3 stars</label>
+          <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+          <label for="first-rate4" title="Very good">4 stars</label>
+          <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+          <label for="first-rate5" title="Amazing">5 stars</label>
+          <span class="starability-focus-ring"></span>
+        </fieldset>
+        <div class="invalid-feedback rating-feedback">Please choose a rating.</div>
       </div>
 
       <div class="mb-3">
@@ -39,19 +42,3 @@
     </form>
   </div>
 </div>
-
-<script>
-  (function () {
-    const rating = document.getElementById('rating');
-    const ratingValue = document.getElementById('ratingValue');
-    if (!rating || !ratingValue) return;
-
-    const update = () => {
-      ratingValue.textContent = rating.value;
-    };
-
-    rating.addEventListener('input', update);
-    update();
-  })();
-</script>
-

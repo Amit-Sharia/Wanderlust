@@ -68,7 +68,12 @@
           <strong>Owner:</strong>
           <%= review.owner && review.owner.username ? review.owner.username : "Unknown" %>
         </p>
-        <p class="mb-1"><strong>Rating:</strong> <%= review.rating %> / 5</p>
+        <p class="mb-1">
+          <strong>Rating:</strong>
+          <span class="starability-result" data-rating="<%= review.rating %>">
+            <%= review.rating %> stars
+          </span>
+        </p>
         <p class="mb-0"><strong>Comment:</strong> <%= review.comment %></p>
         <% if (currentUser && review.owner && currentUser._id.equals(review.owner._id)) { %>
         <form action="/listings/<%= listed._id %>/reviews/<%= review._id %>?_method=DELETE" method="post">
@@ -79,5 +84,4 @@
     <% } %>
   </div>
 <% } %>
-
 

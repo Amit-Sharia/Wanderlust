@@ -238,6 +238,10 @@ body {
     gap: 1rem;
 }
 
+.was-validated .rating-field:has(input:invalid) .rating-feedback {
+    display: block;
+}
+
 .f-info-links a {
     text-decoration: none;
     color: #222;

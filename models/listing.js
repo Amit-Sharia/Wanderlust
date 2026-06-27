@@ -26,6 +26,7 @@ const listingSchema = new Schema({
                 validator: function (v) {
                     // Allow empty/falsy if you want, otherwise remove this condition.
                     if (!v) return true;
+                    if (v.startsWith("/uploads/")) return true;
                     try {
                         // eslint-disable-next-line no-new
                         new URL(v);

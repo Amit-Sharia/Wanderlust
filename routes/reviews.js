@@ -12,76 +12,18 @@ const { validateIdAndListing } = require("../middleware/validateIdAndListing");
 const { validateReview } = require("../middleware/validateReview");
 const { isLoggedIn, isReviewAuthor } = require("../middleware/middleware");
 
-// ======================
+
+//controllers :)
+const reviewController=require("../controllers/reviews");
+
 // Reviews - Read (review form)
-// ======================
-router.get(
-  "/:id/reviews",
-  isLoggedIn,
-  validateIdAndListing,
-  asyncHandler(async (req, res) => {
-    res.render("listings/review.ejs", { listed: req.listed });
-  })
-);
+router.get("/:id/reviews",isLoggedIn,validateIdAndListing,asyncHandler(reviewController.read));
 
-// ======================
 // Reviews - Create
-// ======================
-router.post(
-  "/:id/reviews",
-  isLoggedIn,
-  validateIdAndListing,
-  validateReview,
-  asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { review } = req.body;
+router.post("/:id/reviews",isLoggedIn,validateIdAndListing,validateReview,asyncHandler(reviewController.create));
 
-    // Extra safety (validateIdAndListing handles invalid ids)
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).render("error", {
-        statusCode: 404,
-        message: "Resource not found (invalid id).",
-      });
-    }
-
-    // Create review document
-    const listing = await Listing.findById(id);
-    const newReview = new Review(review);
-    newReview.owner =req.user._id;
-
-    // Link + persist
-    listing.reviews.push(newReview);
-    await newReview.save();
-    await listing.save();
-    req.flash("success","new review created");
-    res.redirect(`/listings/${id}?review=1`);
-  })
-);
-
-// ======================
 // Reviews - Delete
-// ======================
-router.delete(
-  "/:id/reviews/:reviewId",
-  isLoggedIn,
-  isReviewAuthor,
-  asyncHandler(async (req, res) => {
-    const { id, reviewId } = req.params;
-
-    // If review doesn't exist, don't crash
-    const deletedReview = await Review.findByIdAndDelete(reviewId);
-    if (!deletedReview) {
-      req.flash("error", "Review not found.");
-      return res.redirect(`/listings/${id}`);
-    }
-
-    // Remove review id from listing
-    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-
-    req.flash("success","review deleted");
-    res.redirect(`/listings/${id}`);
-  })
-);
+router.delete("/:id/reviews/:reviewId",isLoggedIn,isReviewAuthor,asyncHandler(reviewController.delete));
 
 module.exports = router;
 

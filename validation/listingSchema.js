@@ -7,9 +7,14 @@ const listingSchema = Joi.object({
   title: Joi.string().trim().min(1).required(),
   description: Joi.string().trim().allow('').optional(),
   image: Joi.object({
-    url: Joi.string().uri().optional().allow('').messages({
-      'string.uri': 'Image URL must be a valid URL',
-    }),
+    url: Joi.string()
+      .pattern(/^(https?:\/\/|\/uploads\/).+/)
+      .optional()
+      .allow('')
+      .messages({
+        'string.pattern.base': 'Image must be a valid URL or uploaded image path',
+      }),
+    filename: Joi.string().optional().allow(''),
   }).optional(),
   price: Joi.number().min(0).required(),
   location: Joi.string().trim().min(1).required(),
