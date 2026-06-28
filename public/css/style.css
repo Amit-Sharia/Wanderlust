@@ -8,7 +8,7 @@ body {
 
 .page-shell {
     flex: 1;
-    padding-top: 2rem;
+    padding-top: 3.5rem;
     padding-bottom: 3rem;
 }
 
@@ -312,4 +312,12 @@ body {
     .form-shell {
         padding: 1.25rem;
     }
+}
+
+#map {
+    height: 320px;
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 0.75rem;
+    overflow: hidden;
 }

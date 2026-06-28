@@ -34,14 +34,25 @@ module.exports.login_get =  (req, res) => {
   res.render("users/login.ejs");
 };
 
-module.exports.login_post = passport.authenticate("local", { //middleware for authentication
-    failureRedirect: "/users/login",
-    failureFlash: true,
-  }),
-  (req, res) => {
-    req.flash("success", "Logged in successfully.");
-    res.redirect("/listings");
-  };
+module.exports.login_post = (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return next(err);
+
+    if (!user) {
+      req.flash("error", info?.message || "Invalid username or password.");
+      return res.redirect("/users/login");
+    }
+
+    req.login(user, (loginErr) => {
+      if (loginErr) return next(loginErr);
+
+      req.flash("success", "Logged in successfully.");
+      const redirectUrl = req.session?.redirectUrl || "/listings";
+      if (req.session) req.session.redirectUrl = null;
+      return res.redirect(redirectUrl);
+    });
+  })(req, res, next);
+};
 
 module.exports.logout = (req, res, next) => {
   req.logout((err) => {

@@ -1,6 +1,6 @@
 const express = require("express");
+const multer = require("multer");
 const router = express.Router();
-const path = require("path");
 
 // Requirements (needed by routes)
 const asyncHandler = require("../utils/asyncHandler");
@@ -10,19 +10,10 @@ const { validateIdAndListing } = require("../middleware/validateIdAndListing");
 const { isLoggedIn, isOwner } = require("../middleware/middleware");
 
 //controllers :)
-const listingController =require("../controllers/listing");
+const listingController = require("../controllers/listing");
 
-// Multer local image upload
-const multer = require("multer");
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../public/uploads"));
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  },
-});
+// Cloudinary upload config
+const { storage } = require("../cloudConfig.js");
 
 const upload = multer({
   storage,

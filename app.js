@@ -1,6 +1,11 @@
 /*********************************
  * Imports & App Setup
  *********************************/
+//.env setup
+if(process.env.NODE_ENV!="production"){
+  require("dotenv").config();
+}
+
 const express = require("express");
 const app = express();
 
@@ -47,6 +52,8 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success") || "";
   res.locals.error = req.flash("error") || "";
   res.locals.currentUser = req.user;
+  const fallbackMapboxToken = "pk.eyJ1IjoiYW1pdDEwIiwiYSI6ImNtcXc4N2xtMzA0YnYycnNhcTNobWtpd2sifQ.zi8SrM5yO-vSATWvs-ZMgw";
+  res.locals.mapboxToken = process.env.MAP_TOKEN || process.env.MAPBOX_ACCESS_TOKEN || fallbackMapboxToken;
   next();
 });
 
