@@ -11,7 +11,7 @@ const app = express();
 
 const mongoose = require("mongoose");
 // const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
-const CloudDB =process.env.AtlasDB_URL;
+const CloudDB = process.env.AtlasDB_URL || process.env.ATLASDB_URL;
 
 // Utilities / Middleware
 const path = require("path");
@@ -30,11 +30,15 @@ const { MongoStore } = require('connect-mongo');
 const passport = require("passport");
 const User = require("./models/user.js");
 
-// Sessions
-// Use a Mongo-backed session store. Install with: npm install connect-mongo
-const sessionSecret = process.env.SESSION_SECRET;
+const dbUrl = CloudDB || "mongodb://127.0.0.1:27017/wanderlust";
+const sessionSecret = process.env.SESSION_SECRET || "changeMeToASecretInProduction";
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 const sessionStore = MongoStore.create({
-  mongoUrl: CloudDB || process.env.AtlasDB_URL,
+  mongoUrl: dbUrl,
   crypto: { secret: sessionSecret },
 });
 
@@ -46,7 +50,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production" && process.env.SESSION_COOKIE_SECURE === "true",
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
@@ -137,7 +141,8 @@ app.use(errorHandler);
 /*********************************
  * Server
  *********************************/
-app.listen(8080, () => {
-  console.log("server is listining to port 8080");
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`server is listening on port ${PORT}`);
 });
 
