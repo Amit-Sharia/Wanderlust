@@ -2,6 +2,8 @@
 
 A travel listing web application built with Node.js, Express, MongoDB, Passport authentication, and EJS templates. Users can browse travel listings, register and log in, add reviews, and manage listings with a modern UI and flash message feedback.
 
+**GitHub description:** A simple travel marketplace prototype with user auth, listings, reviews, and session-backed flash notifications.
+
 ## Features
 
 - User registration, login, and logout with Passport.js
