@@ -113,9 +113,9 @@ main()
 /*********************************
  * Routes
  *********************************/
-// app.get("/", (req, res) => {
-//   res.send("server is working");
-// });
+app.get("/", (req, res) => {
+  res.redirect("/listings/");
+});
 
 // Fallback for navbar link without trailing slash
 app.get("/listings", (req, res) => {
