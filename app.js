@@ -10,7 +10,8 @@ const express = require("express");
 const app = express();
 
 const mongoose = require("mongoose");
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+// const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+const CloudDB =process.env.AtlasDB_URL;
 
 // Utilities / Middleware
 const path = require("path");
@@ -22,17 +23,33 @@ const errorHandler = require("./middleware/errorHandler");
 // Flash + session
 const flash = require("connect-flash");
 const session = require("express-session");
+// Mongo session store
+const { MongoStore } = require('connect-mongo');
 
 // Passport auth
 const passport = require("passport");
 const User = require("./models/user.js");
 
 // Sessions
+// Use a Mongo-backed session store. Install with: npm install connect-mongo
+const sessionSecret = process.env.SESSION_SECRET;
+const sessionStore = MongoStore.create({
+  mongoUrl: CloudDB || process.env.AtlasDB_URL,
+  crypto: { secret: sessionSecret },
+});
+
 app.use(
   session({
-    secret: "mysupersecret",
+    secret: sessionSecret,
+    store: sessionStore,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+    },
   })
 );
 
@@ -52,6 +69,8 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success") || "";
   res.locals.error = req.flash("error") || "";
   res.locals.currentUser = req.user;
+  res.locals.currentSearch = req.query.search || "";
+  res.locals.currentFilter = req.query.filter || "";
   const fallbackMapboxToken = "pk.eyJ1IjoiYW1pdDEwIiwiYSI6ImNtcXc4N2xtMzA0YnYycnNhcTNobWtpd2sifQ.zi8SrM5yO-vSATWvs-ZMgw";
   res.locals.mapboxToken = process.env.MAP_TOKEN || process.env.MAPBOX_ACCESS_TOKEN || fallbackMapboxToken;
   next();
@@ -83,7 +102,7 @@ app.use("/users", userRouter);
 async function main() {
   // Disable strict populate (prevents errors when populate paths don’t match schema exactly)
   mongoose.set("strictPopulate", false);
-  await mongoose.connect(MONGO_URL);
+  await mongoose.connect(CloudDB);
 }
 
 main()
@@ -94,9 +113,9 @@ main()
 /*********************************
  * Routes
  *********************************/
-app.get("/", (req, res) => {
-  res.send("server is working");
-});
+// app.get("/", (req, res) => {
+//   res.send("server is working");
+// });
 
 // Fallback for navbar link without trailing slash
 app.get("/listings", (req, res) => {

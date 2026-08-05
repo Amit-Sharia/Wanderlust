@@ -16,4 +16,19 @@
       form.classList.add('was-validated')
     }, false)
   })
+
+  const taxToggleBtn = document.getElementById('taxToggleBtn')
+
+  if (taxToggleBtn) {
+    taxToggleBtn.addEventListener('click', () => {
+      const afterTaxLabels = document.querySelectorAll('.listing-price-after-tax')
+      const isVisible = taxToggleBtn.dataset.visible === 'true'
+      taxToggleBtn.dataset.visible = isVisible ? 'false' : 'true'
+      taxToggleBtn.textContent = isVisible ? 'Show amount after tax' : 'Hide amount after tax'
+
+      afterTaxLabels.forEach(label => {
+        label.classList.toggle('visible', !isVisible)
+      })
+    })
+  }
 })()

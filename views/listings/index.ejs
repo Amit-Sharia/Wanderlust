@@ -1,60 +1,69 @@
 <% layout("layouts/boilerplate.ejs") %>
-<%
-    const fallbackImage = "https://static.vecteezy.com/system/resources/thumbnails/057/068/323/small/single-fresh-red-strawberry-on-table-green-background-food-fruit-sweet-macro-juicy-plant-image-photo.jpg";
-%>
+<% const fallbackImage = "https://static.vecteezy.com/system/resources/thumbnails/057/068/323/small/single-fresh-red-strawberry-on-table-green-background-food-fruit-sweet-macro-juicy-plant-image-photo.jpg" %>
 
-<section class="listings-header">
+<section class="listings-filter-bar">
+  <div class="filters-row">
     <div>
-        <p class="section-kicker"><%= success %></p> <!--flash card-->  
-        <h1>All Listings</h1>
+      <p class="section-kicker"><%= success %></p>
+      <h1>All Listings &#128512;</h1>
     </div>
-    <a href="/listings/new" class="btn btn-dark add-listing-btn">
-        <i class="fa-solid fa-plus"></i>
-        Add listing
-    </a>
+    <div class="listings-toolbar">
+      <button id="taxToggleBtn" type="button" class="btn btn-outline-danger btn-sm" data-visible="false">Show amount after tax</button>
+    </div>
+  </div>
+
+  <nav class="navbar-nav filters-nav" aria-label="Listing filters">
+    <a href="/listings?filter=trending<%= currentSearch ? '&search=' + encodeURIComponent(currentSearch) : '' %>" class="nav-link<%= currentFilter === 'trending' ? ' active' : '' %>">Trending</a>
+    <a href="/listings?filter=iconic-cities<%= currentSearch ? '&search=' + encodeURIComponent(currentSearch) : '' %>" class="nav-link<%= currentFilter === 'iconic-cities' ? ' active' : '' %>">Iconic Cities</a>
+    <a href="/listings?filter=mountain<%= currentSearch ? '&search=' + encodeURIComponent(currentSearch) : '' %>" class="nav-link<%= currentFilter === 'mountain' ? ' active' : '' %>">Mountain</a>
+    <a href="/listings?filter=beach<%= currentSearch ? '&search=' + encodeURIComponent(currentSearch) : '' %>" class="nav-link<%= currentFilter === 'beach' ? ' active' : '' %>">Beach</a>
+    <a href="/listings?filter=pools<%= currentSearch ? '&search=' + encodeURIComponent(currentSearch) : '' %>" class="nav-link<%= currentFilter === 'pools' ? ' active' : '' %>">Pools</a>
+  </nav>
 </section>
 
 <% if (!allListings || allListings.length === 0) { %>
-    <section class="empty-state">
-        <i class="fa-regular fa-map"></i>
-        <h2>No listings yet</h2>
-        <p>Create your first stay and it will appear here.</p>
-        <a href="/listings/new" class="btn btn-dark">Add listing</a>
-    </section>
+  <section class="empty-state">
+    <i class="fa-regular fa-map"></i>
+    <h2>No listings yet</h2>
+    <p>Create your first stay and it will appear here.</p>
+    <a href="/listings/new" class="btn btn-dark">Add listing</a>
+  </section>
 <% } else { %>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 listings-grid">
-        <% for (let listing of allListings) { %>
-            <%
-                const imageUrl = listing.image && listing.image.url ? listing.image.url : fallbackImage;
-                const title = listing.title || "Untitled listing";
-                const description = listing.description || "No description available.";
-                const price = Number(listing.price);
-                const hasPrice = Number.isFinite(price) && price > 0;
-                const locationParts = [listing.location, listing.country].filter(Boolean);
-            %>
-            <div class="col">
-                <a href="/listings/<%= listing._id %>" class="listing-card-link">
-                    <article class="card listing-card h-100">
-                        <img src="<%= imageUrl %>" class="card-img-top listing-img" alt="<%= title %>">
-                        <div class="card-body">
-                            <div class="listing-card-title-row">
-                                <h2 class="card-title"><%= title %></h2>
-                                <% if (hasPrice) { %>
-                                    <span class="listing-price">&#8377; <%= price.toLocaleString("en-IN") %></span>
-                                <% } %>
-                            </div>
-                            <p class="card-text listing-description"><%= description %></p>
-                            <div class="listing-meta">
-                                <span>
-                                    <i class="fa-solid fa-location-dot"></i>
-                                    <%= locationParts.length ? locationParts.join(", ") : "Location not added" %>
-                                </span>
-                                <span><%= hasPrice ? "per night" : "Price not added" %></span>
-                            </div>
-                        </div>
-                    </article>
-                </a>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 listings-grid">
+    <% for (let listing of allListings) { %>
+      <% const imageUrl = listing.image && listing.image.url ? listing.image.url : fallbackImage %>
+      <% const title = listing.title || "Untitled listing" %>
+      <% const description = listing.description || "No description available." %>
+      <% const price = Number(listing.price) %>
+      <% const hasPrice = Number.isFinite(price) && price > 0 %>
+      <% const locationParts = [listing.location, listing.country].filter(Boolean) %>
+      <div class="col">
+        <a href="/listings/<%= listing._id %>" class="listing-card-link">
+          <article class="card listing-card h-100">
+            <img src="<%= imageUrl %>" class="card-img-top listing-img" alt="<%= title %>">
+            <div class="card-body">
+              <div class="listing-card-title-row">
+                <h2 class="card-title"><%= title %></h2>
+                <% if (hasPrice) { %>
+                  <% const amountAfterTax = price * 1.18 %>
+                  <span class="listing-price">
+                    &#8377; <%= price.toLocaleString("en-IN") %>
+                    <span class="listing-price-after-tax">| ₹ <%= amountAfterTax.toLocaleString("en-IN", { maximumFractionDigits: 0 }) %> after tax</span>
+                  </span>
+                <% } %>
+              </div>
+              <p class="card-text listing-description"><%= description %></p>
+              <div class="listing-meta">
+                <span>
+                  <i class="fa-solid fa-location-dot"></i>
+                  <%= locationParts.length ? locationParts.join(", ") : "Location not added" %>
+                </span>
+                <span><%= hasPrice ? "per night" : "Price not added" %></span>
+              </div>
             </div>
-        <% } %>
-    </div>
+          </article>
+        </a>
+      </div>
+    <% } %>
+  </div>
 <% } %>

@@ -5,6 +5,13 @@
     const price = Number(listed.price);
     const hasPrice = Number.isFinite(price) && price > 0;
 %>
+<script>
+  const mapToken = <%- JSON.stringify(mapboxToken) %>;
+  const listingCoordinates = <%- JSON.stringify((listed.geometry && Array.isArray(listed.geometry.coordinates) ? listed.geometry.coordinates : null)) %>;
+  const listingLocation = <%- JSON.stringify(listed.location || '') %>;
+  const listingCountry = <%- JSON.stringify(listed.country || '') %>;
+  const mapContainerId = 'map';
+</script>
 
 <section class="show-listing">
     <img src="<%= imageUrl %>" class="show-listing-img" alt="<%= listed.title || 'Listing image' %>">
@@ -86,22 +93,5 @@
 <% } %>
 <h5>Location map</h5>
 <div id="map"></div>
-<script>
-    const mapboxToken = '<%= mapboxToken %>';
-    const mapContainer = document.getElementById('map');
-
-    if (!mapboxToken) {
-        mapContainer.innerHTML = '<p class="text-muted">Map unavailable: no Mapbox token configured.</p>';
-    } else {
-        const map = new mapboxgl.Map({
-            accessToken: mapboxToken,
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v12',
-            center: [-71.06776, 42.35816],
-            zoom: 9
-        });
-
-        map.addControl(new mapboxgl.NavigationControl());
-    }
-</script>
+<script src="/js/map.js"></script>
 

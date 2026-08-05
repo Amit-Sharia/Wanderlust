@@ -17,20 +17,33 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <a class="nav-link" href="/listings"> Home</a>
       <div class="navbar-nav me-auto">
-        <a class="nav-link" href="/">Home</a>
-        <a class="nav-link" href="/listings">All listings</a>
-        <a class="nav-link" href="/listings/new">Add new listings</a>
+        <form class="d-flex align-items-center mx-3" role="search" action="/listings" method="get">
+        <input
+          class="form-control me-2"
+          type="search"
+          placeholder="Search stays"
+          aria-label="Search listings"
+          name="search"
+          value="<%= currentSearch || '' %>"
+        />
+        <input type="hidden" name="filter" value="<%= currentFilter || '' %>" />
+        <button class="btn btn-outline-dark" type="submit">Search</button>
+      </form>
+      
       </div>
 
       <div class="navbar-nav ms-auto">
+
+        <a class="nav-link" href="/listings/new"> <i class="fa-solid fa-plus me-2"></i> Add listing</a>
         <% if(! currentUser){ %>
-        <a class="nav-link" href="/users/register">Register</a>
-        <a class="nav-link" href="/users/login">Login</a>
+        <a class="nav-link" href="/users/register"><b>Register</b></a>
+        <a class="nav-link" href="/users/login"><b>Login</b></a>
         <% } %>
          <% if(currentUser) { %>
         <form action="/users/logout" method="POST" class="m-2 p-0">
-        <button type="submit" class="nav-link btn btn-link p-0 m-0">Logout</button>
+        <button type="submit" class="nav-link btn btn-link p-0 m-0"><b>Logout</b></button>
         </form>
          <% } %>
       </div>

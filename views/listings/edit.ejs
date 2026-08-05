@@ -2,6 +2,11 @@
 <%
     const imageUrl = listed.image && listed.image.url ? listed.image.url : "";
 %>
+<script>
+  const mapToken = <%- JSON.stringify(mapboxToken) %>;
+  const listingCoordinates = <%- JSON.stringify((listed.geometry && Array.isArray(listed.geometry.coordinates) ? listed.geometry.coordinates : null)) %>;
+  const mapContainerId = 'map-preview';
+</script>
 
 <section class="form-shell">
     <h1>Edit listing</h1>
@@ -17,6 +22,11 @@
         <input class="form-control" name="price" type="number" min="0" value="<%= listed.price || '' %>">
         <input class="form-control" name="location" type="text" value="<%= listed.location || '' %>">
         <input class="form-control" name="country" type="text" value="<%= listed.country || '' %>">
+        <div class="mt-4">
+            <h5>Location preview</h5>
+            <div id="map-preview" style="min-height: 260px; border-radius: 0.75rem; overflow: hidden; background: #f3f3f3;"></div>
+        </div>
         <button class="btn btn-dark">Save changes</button>
     </form>
+    <script src="/js/map.js"></script>
 </section>
