@@ -147,14 +147,14 @@
           <% } else { %>
             <div class="text-center py-3">
               <p class="text-muted small mb-3">Please log in to send a booking appointment request to the host.</p>
-              <a href="/users/login" class="btn btn-dark w-100 rounded-3">Log in to Book</a>
+              <a href="/users/login" class="btn btn-brand-primary w-100 rounded-3 fw-semibold">Log in to Book</a>
             </div>
           <% } %>
         </div>
       </div>
     </div>
 
-    <hr class="my-4" />
+    <hr class="my-4 opacity-25" />
 
     <!-- Reviews Section -->
     <div class="mb-5">
@@ -179,30 +179,42 @@
       </div>
 
       <% if (!listed.reviews || listed.reviews.length === 0) { %>
-        <div class="card border border-rose-light rounded-4 p-4 text-center bg-rose-tint">
+        <div class="card border-0 rounded-4 p-4 text-center bg-rose-tint shadow-sm">
           <p class="text-muted mb-0"><i class="fa-regular fa-comment-dots fs-4 d-block mb-2 text-danger opacity-75"></i> No reviews submitted yet. Be the first to review!</p>
         </div>
       <% } else { %>
         <div class="row g-3">
           <% for (let review of listed.reviews) { %>
             <div class="col-md-6">
-              <div class="card review-card p-3.5 h-100 d-flex flex-column">
-                <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2 border-bottom pb-2 border-rose-light">
+              <div class="card review-card p-4 h-100 d-flex flex-column border-0 shadow-sm rounded-4">
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                   <div class="d-flex align-items-center gap-2">
                     <div class="avatar-badge-red">
                       <i class="fa-solid fa-user"></i>
                     </div>
                     <div>
-                      <strong class="text-dark small d-block"><%= review.owner && review.owner.username ? review.owner.username : "Guest" %></strong>
+                      <strong class="text-dark small d-block mb-0"><%= review.owner && review.owner.username ? review.owner.username : "Guest" %></strong>
                       <span class="text-muted opacity-75" style="font-size: 0.75rem;"><%= new Date(review.createdAt || Date.now()).toLocaleDateString() %></span>
                     </div>
                   </div>
                   <span class="starability-result scale-90" data-rating="<%= review.rating %>"></span>
                 </div>
-                <p class="review-comment small mb-2 flex-grow-1"><%= review.comment %></p>
+                <p class="review-comment small mb-3 flex-grow-1"><%= review.comment %></p>
 
                 <% if (currentUser && review.owner && (review.owner._id ? currentUser._id.equals(review.owner._id) : currentUser._id.equals(review.owner))) { %>
-                  <form action="/listings/<%= listed._id %>/reviews/<%= review._id %>?_method=DELETE" method="post" class="mt-auto pt-2 text-end border-top border-rose-light">
+                  <form action="/listings/<%= listed._id %>/reviews/<%= review._id %>?_method=DELETE" method="post" class="mt-auto text-end">
+                    <button type="submit" class="btn btn-link text-danger p-0 border-0 small text-decoration-none fw-semibold">
+                      <i class="fa-solid fa-trash me-1"></i> Delete
+                    </button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+
                     <button type="submit" class="btn btn-link text-danger p-0 border-0 small text-decoration-none fw-semibold">
                       <i class="fa-solid fa-trash me-1"></i> Delete
                     </button>

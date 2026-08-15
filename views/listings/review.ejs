@@ -13,7 +13,7 @@
       <form class="needs-validation" action="/listings/<%= listed._id %>/reviews" method="post" novalidate>
         <div class="mb-4 rating-field">
           <label class="form-label fw-semibold text-secondary d-block">Rating</label>
-          <fieldset class="starability-slot">
+          <fieldset class="starability-coinFlip">
             <legend class="visually-hidden">Choose a rating</legend>
             <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" aria-label="No rating." required />
             <input type="radio" id="first-rate1" name="review[rating]" value="1" required />
@@ -30,6 +30,7 @@
           </fieldset>
           <div class="invalid-feedback rating-feedback text-danger">Please choose a star rating.</div>
         </div>
+
 
         <div class="mb-4">
           <label for="comment" class="form-label fw-semibold text-secondary">Comments & Review</label>

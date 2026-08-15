@@ -5,7 +5,7 @@
     <div class="col-lg-8">
       <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
         <!-- Chat Header -->
-        <div class="card-header bg-dark text-white p-3 p-sm-4 d-flex align-items-center justify-content-between">
+        <div class="card-header bg-danger bg-gradient text-white p-3 p-sm-4 d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center gap-3">
             <a href="/bookings/dashboard" class="btn btn-outline-light btn-sm rounded-circle p-2" title="Back to Dashboard">
               <i class="fa-solid fa-arrow-left"></i>
@@ -17,23 +17,23 @@
               </small>
             </div>
           </div>
-          <span class="badge bg-success rounded-pill px-3 py-2">BOOKED MODE</span>
+          <span class="badge bg-white text-danger rounded-pill px-3 py-2 fw-semibold">BOOKED MODE</span>
         </div>
 
         <!-- Chat Body -->
-        <div class="card-body p-4 bg-light chat-messages-box" style="height: 420px; overflow-y: auto;">
+        <div class="card-body p-4 bg-rose-tint chat-messages-box" style="height: 420px; overflow-y: auto;">
           <% if (!messages || messages.length === 0) { %>
             <div class="text-center text-muted my-5">
-              <i class="fa-solid fa-comments fs-1 opacity-50 mb-2"></i>
+              <i class="fa-solid fa-comments fs-1 opacity-50 mb-2 text-danger"></i>
               <p class="mb-0">No messages yet. Start the conversation!</p>
             </div>
           <% } else { %>
             <% for (let m of messages) { %>
               <% const isMine = m.sender && currentUser._id.equals(m.sender._id); %>
               <div class="d-flex mb-3 <%= isMine ? 'justify-content-end' : 'justify-content-start' %>">
-                <div class="chat-bubble p-3 rounded-4 shadow-sm max-w-75 <%= isMine ? 'bg-danger text-white' : 'bg-white text-dark border' %>">
+                <div class="chat-bubble p-3 rounded-4 shadow-sm max-w-75 <%= isMine ? 'bg-danger text-white' : 'bg-white text-dark border border-rose-light' %>">
                   <div class="d-flex align-items-center gap-2 mb-1">
-                    <strong class="small <%= isMine ? 'text-white-50' : 'text-primary' %>">
+                    <strong class="small <%= isMine ? 'text-white-50' : 'text-danger' %>">
                       <%= m.sender ? m.sender.username : 'User' %>
                     </strong>
                     <span class="small opacity-50 text-nowrap" style="font-size: 0.75rem;">
@@ -43,6 +43,7 @@
                   <p class="mb-0 text-break"><%= m.text %></p>
                 </div>
               </div>
+
             <% } %>
           <% } %>
         </div>

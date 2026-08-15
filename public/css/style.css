@@ -75,27 +75,48 @@ body {
 }
 
 .search-input-group {
-    background: #f1f5f9;
-    border-radius: 999px;
-    padding: 2px;
-    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    border-radius: 9999px !important;
+    padding: 3px 4px 3px 14px;
+    border: 1.5px solid #fecdd3 !important;
+    box-shadow: 0 4px 14px rgba(225, 29, 72, 0.06);
+    transition: all 0.25s ease;
+}
+
+.search-input-group:focus-within {
+    border-color: #e11d48 !important;
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
 }
 
 .search-input-group .form-control {
-    background: transparent;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    font-size: 0.92rem;
 }
 
 .btn-search {
-    background: var(--brand-primary);
+    background: #e11d48;
     color: white;
-    border-radius: 999px;
+    border-radius: 9999px !important;
     font-weight: 600;
+    border: none !important;
+    padding: 0.45rem 1.1rem;
+    transition: all 0.2s ease;
 }
 
 .btn-search:hover {
-    background: var(--brand-primary-hover);
+    background: #be123c;
     color: white;
 }
+
+.nav-pills .nav-link.active {
+    background-color: #e11d48 !important;
+    color: white !important;
+    box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25);
+}
+
 
 /* Filter Buttons */
 .btn-filter {

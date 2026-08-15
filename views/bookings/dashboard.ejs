@@ -62,7 +62,7 @@
 
                   <div class="mt-auto d-flex gap-2">
                     <% if (b.status === 'approved') { %>
-                      <a href="/bookings/<%= b._id %>/chat" class="btn btn-primary btn-sm rounded-3 flex-grow-1">
+                      <a href="/bookings/<%= b._id %>/chat" class="btn btn-brand-primary btn-sm rounded-3 flex-grow-1">
                         <i class="fa-solid fa-comments me-1"></i> Chat with Host
                       </a>
                     <% } %>
@@ -124,7 +124,7 @@
                         <button type="submit" class="btn btn-outline-secondary btn-sm w-100 rounded-3">Reject</button>
                       </form>
                     <% } else if (b.status === 'approved') { %>
-                      <a href="/bookings/<%= b._id %>/chat" class="btn btn-primary btn-sm rounded-3 flex-grow-1">
+                      <a href="/bookings/<%= b._id %>/chat" class="btn btn-brand-primary btn-sm rounded-3 flex-grow-1">
                         <i class="fa-solid fa-comments me-1"></i> Open Chat
                       </a>
                       <form action="/bookings/<%= b._id %>/cancel?_method=PATCH" method="POST" class="m-0">
