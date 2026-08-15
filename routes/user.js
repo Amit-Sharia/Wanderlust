@@ -19,16 +19,20 @@ router.route("/login")
 
 // Google OAuth
 router.get("/auth/google", (req, res, next) => {
-  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-    req.flash("error", "Google Sign-In is not configured yet. Please use username & password login.");
+  const gId = process.env.GOOGLE_CLIENT_ID;
+  const gSec = process.env.GOOGLE_CLIENT_SECRET;
+  if (!gId || !gSec || gId.includes("your-google") || gSec.includes("your-google")) {
+    req.flash("error", "Google Sign-In is not configured yet in .env. Please use username & password login.");
     return res.redirect("/users/login");
   }
   passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
 });
 
 router.get("/auth/google/callback", (req, res, next) => {
-  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-    req.flash("error", "Google Sign-In is not configured.");
+  const gId = process.env.GOOGLE_CLIENT_ID;
+  const gSec = process.env.GOOGLE_CLIENT_SECRET;
+  if (!gId || !gSec || gId.includes("your-google") || gSec.includes("your-google")) {
+    req.flash("error", "Google Sign-In is not configured yet in .env. Please use username & password login.");
     return res.redirect("/users/login");
   }
   passport.authenticate("google", { failureRedirect: "/users/login", failureFlash: true })(req, res, () => {
@@ -38,6 +42,7 @@ router.get("/auth/google/callback", (req, res, next) => {
     res.redirect(redirectUrl);
   });
 });
+
 
 // Logout
 router.post("/logout", userController.logout);
