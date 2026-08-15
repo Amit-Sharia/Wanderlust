@@ -78,3 +78,33 @@ module.exports.logout = (req, res, next) => {
   });
 };
 
+module.exports.google_demo_login = async (req, res, next) => {
+  try {
+    let user = await User.findOne({ googleId: "demo_google_123456" });
+    if (!user) {
+      user = await User.findOne({ email: "google_demo@wanderlust.com" });
+    }
+
+    if (!user) {
+      user = new User({
+        username: "Google User",
+        email: "google_demo@wanderlust.com",
+        googleId: "demo_google_123456"
+      });
+      user = await User.register(user, "GoogleDemoSecretPass123!");
+    }
+
+    req.login(user, (err) => {
+      if (err) return next(err);
+      req.flash("success", "Successfully signed in as Google User!");
+      const redirectUrl = req.session?.redirectUrl || "/listings";
+      if (req.session) req.session.redirectUrl = null;
+      res.redirect(redirectUrl);
+    });
+  } catch (err) {
+    req.flash("error", "Error with Google Sign-In: " + err.message);
+    res.redirect("/users/login");
+  }
+};
+
+
