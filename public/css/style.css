@@ -74,21 +74,21 @@ body {
     box-shadow: 0 6px 16px rgba(254, 66, 77, 0.3);
 }
 
-.search-input-group {
+.search-input-pill {
     background: #ffffff;
     border-radius: 9999px !important;
-    padding: 3px 4px 3px 14px;
+    padding: 3px 4px 3px 12px;
     border: 1.5px solid #fecdd3 !important;
     box-shadow: 0 4px 14px rgba(225, 29, 72, 0.06);
     transition: all 0.25s ease;
 }
 
-.search-input-group:focus-within {
+.search-input-pill:focus-within {
     border-color: #e11d48 !important;
     box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
 }
 
-.search-input-group .form-control {
+.search-input-pill .form-control {
     background: transparent !important;
     border: none !important;
     outline: none !important;
@@ -96,20 +96,12 @@ body {
     font-size: 0.92rem;
 }
 
-.btn-search {
-    background: #e11d48;
-    color: white;
-    border-radius: 9999px !important;
-    font-weight: 600;
+.search-input-pill .form-control:focus {
     border: none !important;
-    padding: 0.45rem 1.1rem;
-    transition: all 0.2s ease;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
-.btn-search:hover {
-    background: #be123c;
-    color: white;
-}
 
 .nav-pills .nav-link.active {
     background-color: #e11d48 !important;

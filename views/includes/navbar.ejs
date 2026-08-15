@@ -20,23 +20,20 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
-      <form class="d-flex align-items-center mx-lg-4 my-2 my-lg-0 search-bar-form flex-grow-1 max-w-md" role="search" action="/listings" method="get">
-        <div class="input-group search-input-group">
-          <span class="input-group-text bg-transparent border-end-0 text-muted ps-3">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </span>
-          <input
-            class="form-control border-start-0 ps-0 shadow-none"
-            type="search"
-            placeholder="Search stays, cities, mountains..."
-            aria-label="Search listings"
-            name="search"
-            value="<%= typeof currentSearch !== 'undefined' ? currentSearch : '' %>"
-          />
-          <input type="hidden" name="filter" value="<%= typeof currentFilter !== 'undefined' ? currentFilter : '' %>" />
-          <button class="btn btn-search px-3" type="submit">Search</button>
-        </div>
+      <form class="d-flex align-items-center mx-lg-4 my-2 my-lg-0 search-input-pill flex-grow-1 max-w-md" role="search" action="/listings" method="get">
+        <i class="fa-solid fa-magnifying-glass text-danger ms-3 me-2 fs-6"></i>
+        <input
+          class="form-control border-0 shadow-none bg-transparent ps-0"
+          type="search"
+          placeholder="Search stays, cities, mountains..."
+          aria-label="Search listings"
+          name="search"
+          value="<%= typeof currentSearch !== 'undefined' ? currentSearch : '' %>"
+        />
+        <input type="hidden" name="filter" value="<%= typeof currentFilter !== 'undefined' ? currentFilter : '' %>" />
+        <button class="btn btn-brand-primary rounded-pill px-3 py-1.5 me-1 text-nowrap" type="submit">Search</button>
       </form>
+
 
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
         <li class="nav-item">
