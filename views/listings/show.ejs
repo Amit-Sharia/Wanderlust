@@ -1,10 +1,17 @@
 <% layout("layouts/boilerplate.ejs") %>
 <%
     const fallbackImage = "https://static.vecteezy.com/system/resources/thumbnails/057/068/323/small/single-fresh-red-strawberry-on-table-green-background-food-fruit-sweet-macro-juicy-plant-image-photo.jpg";
-    const imageUrl = listed.image && listed.image.url ? listed.image.url : fallbackImage;
+    const imagesList = (listed.images && listed.images.length > 0) ? listed.images : [{ url: (listed.image && listed.image.url ? listed.image.url : fallbackImage) }];
     const price = Number(listed.price);
     const hasPrice = Number.isFinite(price) && price > 0;
+    const isOwner = currentUser && listed.owner && currentUser._id.equals(listed.owner._id);
+
+    // Check if current user already submitted a review
+    const userAlreadyReviewed = currentUser && Array.isArray(listed.reviews) && listed.reviews.some(
+      r => r.owner && (r.owner._id ? r.owner._id.equals(currentUser._id) : r.owner.equals(currentUser._id))
+    );
 %>
+
 <script>
   const mapToken = <%- JSON.stringify(mapboxToken) %>;
   const listingCoordinates = <%- JSON.stringify((listed.geometry && Array.isArray(listed.geometry.coordinates) ? listed.geometry.coordinates : null)) %>;
@@ -13,85 +20,200 @@
   const mapContainerId = 'map';
 </script>
 
-<section class="show-listing">
-    <img src="<%= imageUrl %>" class="show-listing-img" alt="<%= listed.title || 'Listing image' %>">
-    <div class="show-listing-content">
-        <p class="section-kicker">Listing details</p>
-        <h1><%= listed.title || "Untitled listing" %></h1>
-        <i>
-          Owner :
-          <b><%= (listed.owner && listed.owner.username) ? listed.owner.username : "Unknown" %></b>
-        </i>
-        <br>
-        <p><%= listed.description || "No description available." %></p>
-        <ul class="show-listing-meta">
-            <li>
-                <strong>Price:</strong>
-                <% if (hasPrice) { %>
-                    &#8377; <%= price.toLocaleString("en-IN") %> / night
-                <% } else { %>
-                    Not added
-                <% } %>
-            </li>
-            <li><strong>Location:</strong> <%= listed.location || "Not added" %></li>
-            <li><strong>Country:</strong> <%= listed.country || "Not added" %></li>
-        </ul>
-        <% if (currentUser && listed.owner && currentUser._id.equals(listed.owner._id)) { %>
-        <a href="/listings/<%= listed._id %>/edit" class="btn btn-dark">Edit listing</a>
-        <% } %>
-    </div>
-</section>
-
-<% if (typeof review !== 'undefined' && review === '1') { %>
-  <div class="alert alert-success" role="alert">
-    Review saved successfully.
-  </div>
-<% } %>
-
-<% if (currentUser && listed.owner && currentUser._id.equals(listed.owner._id)) { %>
-<div class="mt-3">
-    <form action="/listings/<%= listed._id %>?_method=DELETE" method="post">
-        <button class="btn btn-outline-danger">Delete listing</button>
-    </form>
-</div>
-<% } %>
-<% if (currentUser) { %>
-<div class="mt-3">
-    <form action="/listings/<%= listed._id %>/reviews" method="get">
-        <button class="btn btn-outline-primary">Add Review</button>
-    </form>
-</div>
-<% } %>
-<hr>
-
-<h4>All reviews</h4>
-<% if (!listed.reviews || listed.reviews.length === 0) { %>
-  <p>No reviews yet.</p>
-<% } else { %>
-  <div class="reviews">
-    <% for (let review of listed.reviews) { %>
-      <div class="review col-6 mb-2 p-2 border rounded">
-        <p class="mb-1">
-          <strong>Owner:</strong>
-          <%= review.owner && review.owner.username ? review.owner.username : "Unknown" %>
+<div class="row my-4">
+  <div class="col-lg-8 mx-auto">
+    <!-- Header Title & Badges -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+      <div>
+        <h1 class="fw-bold text-dark mb-1"><%= listed.title || "Untitled Stay" %></h1>
+        <p class="text-muted mb-0">
+          <i class="fa-solid fa-location-dot text-danger me-1"></i>
+          <%= listed.location || "Location" %>, <%= listed.country || "Country" %>
         </p>
-        <p class="mb-1">
-          <strong>Rating:</strong>
-          <span class="starability-result" data-rating="<%= review.rating %>">
-            <%= review.rating %> stars
+      </div>
+      <div>
+        <% if (listed.isBooked) { %>
+          <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm">
+            <i class="fa-solid fa-lock me-1"></i> BOOKED MODE
           </span>
-        </p>
-        <p class="mb-0"><strong>Comment:</strong> <%= review.comment %></p>
-        <% if (currentUser && review.owner && currentUser._id.equals(review.owner._id)) { %>
-        <form action="/listings/<%= listed._id %>/reviews/<%= review._id %>?_method=DELETE" method="post">
-          <button class="btn btn-outline-danger">Delete</button>
-        </form>
+        <% } else { %>
+          <span class="badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm">
+            <i class="fa-solid fa-circle-check me-1"></i> Available
+          </span>
         <% } %>
       </div>
-    <% } %>
+    </div>
+
+    <!-- Multi-Photo Image Carousel -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+      <% if (imagesList.length > 1) { %>
+        <div id="showCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-indicators">
+            <% imagesList.forEach((_, idx) => { %>
+              <button type="button" data-bs-target="#showCarousel" data-bs-slide-to="<%= idx %>" class="<%= idx === 0 ? 'active' : '' %>" aria-current="<%= idx === 0 ? 'true' : 'false' %>"></button>
+            <% }) %>
+          </div>
+          <div class="carousel-inner">
+            <% imagesList.forEach((img, idx) => { %>
+              <div class="carousel-item <%= idx === 0 ? 'active' : '' %>">
+                <img src="<%= img.url %>" class="d-block w-100" alt="<%= listed.title %>" style="max-height: 460px; object-fit: cover;">
+              </div>
+            <% }) %>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#showCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon rounded-circle bg-dark bg-opacity-50 p-3" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#showCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon rounded-circle bg-dark bg-opacity-50 p-3" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+      <% } else { %>
+        <img src="<%= imagesList[0].url %>" class="card-img-top" alt="<%= listed.title %>" style="max-height: 460px; object-fit: cover;">
+      <% } %>
+    </div>
+
+    <!-- Details Card & Booking Appointment Sidebar -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+          <div class="d-flex align-items-center gap-2 mb-3 pb-3 border-bottom">
+            <i class="fa-solid fa-user-astronaut fs-3 text-danger"></i>
+            <div>
+              <small class="text-muted d-block">Hosted by</small>
+              <strong class="fs-6 text-dark"><%= (listed.owner && listed.owner.username) ? listed.owner.username : "Wanderlust Host" %></strong>
+            </div>
+          </div>
+
+          <h5 class="fw-bold mb-2">About this stay</h5>
+          <p class="text-secondary leading-relaxed mb-4"><%= listed.description || "No description provided." %></p>
+
+          <% if (isOwner) { %>
+            <div class="d-flex gap-2 pt-3 border-top mt-auto">
+              <a href="/listings/<%= listed._id %>/edit" class="btn btn-outline-dark rounded-3 px-4">
+                <i class="fa-solid fa-pen-to-square me-1"></i> Edit Stay
+              </a>
+              <form action="/listings/<%= listed._id %>?_method=DELETE" method="post" class="m-0">
+                <button type="submit" class="btn btn-outline-danger rounded-3 px-4">
+                  <i class="fa-solid fa-trash me-1"></i> Delete Stay
+                </button>
+              </form>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Booking Appointment Card -->
+      <div class="col-md-5">
+        <div class="card border-0 shadow border-top border-4 border-danger rounded-4 p-4">
+          <div class="d-flex align-items-baseline justify-content-between mb-3">
+            <h4 class="fw-bold mb-0">
+              <% if (hasPrice) { %>
+                ₹ <%= price.toLocaleString("en-IN") %>
+                <small class="fs-6 text-muted font-normal">/ night</small>
+              <% } else { %>
+                Price on Request
+              <% } %>
+            </h4>
+          </div>
+
+          <% if (listed.isBooked) { %>
+            <div class="alert alert-danger rounded-3 mb-0" role="alert">
+              <i class="fa-solid fa-lock me-1"></i> This stay is currently booked by a guest.
+            </div>
+          <% } else if (isOwner) { %>
+            <div class="alert alert-info rounded-3 mb-0" role="alert">
+              <i class="fa-solid fa-circle-info me-1"></i> You are the owner of this stay.
+            </div>
+          <% } else if (currentUser) { %>
+            <form action="/bookings/request/<%= listed._id %>" method="POST">
+              <div class="mb-3">
+                <label for="checkIn" class="form-label small fw-semibold text-secondary">Check-in Date</label>
+                <input type="date" class="form-control rounded-3" id="checkIn" name="checkIn" required />
+              </div>
+              <div class="mb-3">
+                <label for="checkOut" class="form-label small fw-semibold text-secondary">Check-out Date</label>
+                <input type="date" class="form-control rounded-3" id="checkOut" name="checkOut" required />
+              </div>
+              <div class="mb-3">
+                <label for="notes" class="form-label small fw-semibold text-secondary">Notes to Host (Optional)</label>
+                <textarea class="form-control rounded-3" id="notes" name="notes" rows="2" placeholder="Hi host, I'm visiting for work..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-brand-primary w-100 py-2.5 rounded-3 fw-semibold">
+                <i class="fa-solid fa-paper-plane me-1"></i> Request Booking
+              </button>
+            </form>
+          <% } else { %>
+            <div class="text-center py-3">
+              <p class="text-muted small mb-3">Please log in to send a booking appointment request to the host.</p>
+              <a href="/users/login" class="btn btn-dark w-100 rounded-3">Log in to Book</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <!-- Reviews Section -->
+    <div class="mb-5">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h4 class="fw-bold mb-0">
+          <i class="fa-solid fa-star text-warning me-1"></i> Reviews (<%= listed.reviews ? listed.reviews.length : 0 %>)
+        </h4>
+
+        <% if (currentUser && !isOwner) { %>
+          <% if (userAlreadyReviewed) { %>
+            <span class="badge bg-secondary rounded-pill px-3 py-2">
+              <i class="fa-solid fa-circle-check me-1 text-success"></i> You reviewed this stay
+            </span>
+          <% } else { %>
+            <a href="/listings/<%= listed._id %>/reviews" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+              <i class="fa-solid fa-plus me-1"></i> Write a Review
+            </a>
+          <% } %>
+        <% } %>
+      </div>
+
+      <% if (!listed.reviews || listed.reviews.length === 0) { %>
+        <p class="text-muted">No reviews submitted yet.</p>
+      <% } else { %>
+        <div class="row g-3">
+          <% for (let review of listed.reviews) { %>
+            <div class="col-md-6">
+              <div class="card border-0 shadow-sm rounded-4 p-3.5 h-100 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-circle-user fs-4 text-secondary"></i>
+                    <strong class="text-dark small"><%= review.owner && review.owner.username ? review.owner.username : "Guest" %></strong>
+                  </div>
+                  <span class="starability-result" data-rating="<%= review.rating %>"></span>
+                </div>
+                <p class="text-secondary small mb-2"><%= review.comment %></p>
+
+                <% if (currentUser && review.owner && (review.owner._id ? currentUser._id.equals(review.owner._id) : currentUser._id.equals(review.owner))) { %>
+                  <form action="/listings/<%= listed._id %>/reviews/<%= review._id %>?_method=DELETE" method="post" class="mt-auto pt-2 text-end">
+                    <button type="submit" class="btn btn-link text-danger p-0 border-0 small text-decoration-none">
+                      <i class="fa-solid fa-trash me-1"></i> Delete
+                    </button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Map Section -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+      <h5 class="fw-bold mb-3"><i class="fa-solid fa-map-location-dot text-danger me-2"></i> Where you'll be</h5>
+      <div id="map" class="rounded-3" style="min-height: 320px; width: 100%;"></div>
+    </div>
   </div>
-<% } %>
-<h5>Location map</h5>
-<div id="map"></div>
+</div>
+
 <script src="/js/map.js"></script>
+
 

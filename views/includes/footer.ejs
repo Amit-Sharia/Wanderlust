@@ -1,15 +1,43 @@
-<footer>
-    <div class="f-info ">
-        <div class="f-info-socials">
-            <i class="fa-brands fa-square-facebook"></i>
-            <i class="fa-brands fa-square-instagram"></i>
-            <i class="fa-brands fa-linkedin"></i>
+<footer class="app-footer mt-auto py-4 bg-light border-top">
+  <div class="container">
+    <div class="row gy-3 align-items-center text-center text-md-start">
+      <div class="col-md-4">
+        <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+          <i class="fa-solid fa-compass text-danger fs-4"></i>
+          <span class="fw-bold fs-5 text-dark">Wanderlust</span>
         </div>
-        <div> &copy; WanderLust Pvt Ltd</div>
-        <div class="f-info-links">
-            <a href="/privacy">Privacy</a>
-            <a href="/terms">Terms & Condition</a>
-        </div>
+        <p class="text-muted small mb-0 mt-1">&copy; <%= new Date().getFullYear() %> Wanderlust Inc. All rights reserved.</p>
+      </div>
 
+      <div class="col-md-4 text-center">
+        <div class="social-handles-container d-flex justify-content-center gap-3">
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="social-icon-btn instagram" aria-label="Instagram">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="social-icon-btn twitter" aria-label="Twitter">
+            <i class="fa-brands fa-x-twitter"></i>
+          </a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="social-icon-btn linkedin" aria-label="LinkedIn">
+            <i class="fa-brands fa-linkedin-in"></i>
+          </a>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="social-icon-btn github" aria-label="GitHub">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="social-icon-btn facebook" aria-label="Facebook">
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-md-4 text-center text-md-end">
+        <ul class="list-inline mb-0 small">
+          <li class="list-inline-item"><a href="#" class="text-muted text-decoration-none hover-dark">Privacy Policy</a></li>
+          <li class="list-inline-item mx-2 text-muted">&bull;</li>
+          <li class="list-inline-item"><a href="#" class="text-muted text-decoration-none hover-dark">Terms of Service</a></li>
+          <li class="list-inline-item mx-2 text-muted">&bull;</li>
+          <li class="list-inline-item"><a href="#" class="text-muted text-decoration-none hover-dark">Support</a></li>
+        </ul>
+      </div>
     </div>
-</footer>
+  </div>
+</footer>

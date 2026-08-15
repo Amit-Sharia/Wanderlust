@@ -1,0 +1,143 @@
+<% layout("layouts/boilerplate.ejs") %>
+
+<div class="container my-4">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h1 class="fw-bold mb-1">My Dashboard</h1>
+      <p class="text-muted">Manage your booking appointment requests and chats</p>
+    </div>
+    <a href="/listings" class="btn btn-outline-dark"><i class="fa-solid fa-arrow-left me-1"></i> Browse Stays</a>
+  </div>
+
+  <ul class="nav nav-pills mb-4" id="dashboardTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active rounded-pill px-4 fw-semibold" id="my-requests-tab" data-bs-toggle="pill" data-bs-target="#my-requests" type="button" role="tab" aria-controls="my-requests" aria-selected="true">
+        <i class="fa-solid fa-plane-departure me-2"></i> My Outgoing Requests (<%= myRequests.length %>)
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link rounded-pill px-4 fw-semibold" id="received-requests-tab" data-bs-toggle="pill" data-bs-target="#received-requests" type="button" role="tab" aria-controls="received-requests" aria-selected="false">
+        <i class="fa-solid fa-inbox me-2"></i> Incoming Stay Requests (<%= ownerRequests.length %>)
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="dashboardTabsContent">
+    <!-- Outgoing Requests Tab -->
+    <div class="tab-pane fade show active" id="my-requests" role="tabpanel" aria-labelledby="my-requests-tab">
+      <% if (!myRequests || myRequests.length === 0) { %>
+        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+          <div class="card-body">
+            <i class="fa-regular fa-calendar-xmark text-muted fs-1 mb-3"></i>
+            <h3>No booking requests yet</h3>
+            <p class="text-muted">Explore our stays and send a booking appointment to host!</p>
+            <a href="/listings" class="btn btn-brand-primary rounded-pill px-4">Explore Listings</a>
+          </div>
+        </div>
+      <% } else { %>
+        <div class="row g-3">
+          <% for (let b of myRequests) { %>
+            <div class="col-md-6 col-lg-4">
+              <div class="card shadow-sm border-0 rounded-4 h-100 position-relative overflow-hidden">
+                <div class="card-body p-4 d-flex flex-column">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="badge rounded-pill px-3 py-1.5 fs-7
+                      <%= b.status === 'approved' ? 'bg-success' : (b.status === 'pending' ? 'bg-warning text-dark' : 'bg-secondary') %>">
+                      <i class="fa-solid <%= b.status === 'approved' ? 'fa-circle-check' : (b.status === 'pending' ? 'fa-clock' : 'fa-circle-xmark') %> me-1"></i>
+                      <%= b.status.toUpperCase() %>
+                    </span>
+                    <span class="text-muted small">₹ <%= b.totalPrice.toLocaleString("en-IN") %></span>
+                  </div>
+
+                  <h5 class="fw-bold mb-1"><%= b.listing ? b.listing.title : 'Stay' %></h5>
+                  <p class="text-muted small mb-2"><i class="fa-solid fa-user me-1"></i> Host: <%= b.owner ? b.owner.username : 'Host' %></p>
+
+                  <div class="bg-light p-3 rounded-3 mb-3 small">
+                    <div><strong>Check-in:</strong> <%= new Date(b.checkIn).toLocaleDateString() %></div>
+                    <div><strong>Check-out:</strong> <%= new Date(b.checkOut).toLocaleDateString() %></div>
+                    <% if (b.notes) { %>
+                      <div class="mt-1 text-truncate"><strong>Note:</strong> <%= b.notes %></div>
+                    <% } %>
+                  </div>
+
+                  <div class="mt-auto d-flex gap-2">
+                    <% if (b.status === 'approved') { %>
+                      <a href="/bookings/<%= b._id %>/chat" class="btn btn-primary btn-sm rounded-3 flex-grow-1">
+                        <i class="fa-solid fa-comments me-1"></i> Chat with Host
+                      </a>
+                    <% } %>
+                    <% if (b.status === 'pending' || b.status === 'approved') { %>
+                      <form action="/bookings/<%= b._id %>/cancel?_method=PATCH" method="POST" class="m-0">
+                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-3">Cancel</button>
+                      </form>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Incoming Requests Tab -->
+    <div class="tab-pane fade" id="received-requests" role="tabpanel" aria-labelledby="received-requests-tab">
+      <% if (!ownerRequests || ownerRequests.length === 0) { %>
+        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+          <div class="card-body">
+            <i class="fa-regular fa-bell-slash text-muted fs-1 mb-3"></i>
+            <h3>No incoming booking requests</h3>
+            <p class="text-muted">Requests for your listings will appear here.</p>
+          </div>
+        </div>
+      <% } else { %>
+        <div class="row g-3">
+          <% for (let b of ownerRequests) { %>
+            <div class="col-md-6 col-lg-4">
+              <div class="card shadow-sm border-0 rounded-4 h-100 overflow-hidden">
+                <div class="card-body p-4 d-flex flex-column">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="badge rounded-pill px-3 py-1.5 fs-7
+                      <%= b.status === 'approved' ? 'bg-success' : (b.status === 'pending' ? 'bg-warning text-dark' : 'bg-secondary') %>">
+                      <%= b.status.toUpperCase() %>
+                    </span>
+                    <span class="text-muted small">₹ <%= b.totalPrice.toLocaleString("en-IN") %></span>
+                  </div>
+
+                  <h5 class="fw-bold mb-1"><%= b.listing ? b.listing.title : 'Listing' %></h5>
+                  <p class="text-muted small mb-2"><i class="fa-solid fa-user-circle me-1"></i> Renter: <%= b.renter ? b.renter.username : 'User' %></p>
+
+                  <div class="bg-light p-3 rounded-3 mb-3 small">
+                    <div><strong>Check-in:</strong> <%= new Date(b.checkIn).toLocaleDateString() %></div>
+                    <div><strong>Check-out:</strong> <%= new Date(b.checkOut).toLocaleDateString() %></div>
+                    <% if (b.notes) { %>
+                      <div class="mt-1"><strong>Guest note:</strong> <%= b.notes %></div>
+                    <% } %>
+                  </div>
+
+                  <div class="mt-auto d-flex flex-wrap gap-2">
+                    <% if (b.status === 'pending') { %>
+                      <form action="/bookings/<%= b._id %>/approve?_method=PATCH" method="POST" class="m-0 flex-grow-1">
+                        <button type="submit" class="btn btn-success btn-sm w-100 rounded-3"><i class="fa-solid fa-check me-1"></i> Accept & Book</button>
+                      </form>
+                      <form action="/bookings/<%= b._id %>/reject?_method=PATCH" method="POST" class="m-0 flex-grow-1">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm w-100 rounded-3">Reject</button>
+                      </form>
+                    <% } else if (b.status === 'approved') { %>
+                      <a href="/bookings/<%= b._id %>/chat" class="btn btn-primary btn-sm rounded-3 flex-grow-1">
+                        <i class="fa-solid fa-comments me-1"></i> Open Chat
+                      </a>
+                      <form action="/bookings/<%= b._id %>/cancel?_method=PATCH" method="POST" class="m-0">
+                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-3">End / Cancel</button>
+                      </form>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

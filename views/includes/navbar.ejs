@@ -1,52 +1,92 @@
-<nav class="navbar navbar-expand-md navbar-ctx sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/listings">
-      <i class="fa-solid fa-compass"></i>
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/listings">
+      <div class="brand-logo-icon">
+        <i class="fa-solid fa-compass"></i>
+      </div>
+      <span class="brand-title">Wanderlust</span>
     </a>
 
     <button
-      class="navbar-toggler"
+      class="navbar-toggler border-0 shadow-none"
       type="button"
       data-bs-toggle="collapse"
-      data-bs-target="#navbarNavAltMarkup"
-      aria-controls="navbarNavAltMarkup"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
       aria-expanded="false"
       aria-label="Toggle navigation"
     >
-      <span class="navbar-toggler-icon"></span>
+      <i class="fa-solid fa-bars fs-4 text-dark"></i>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <a class="nav-link" href="/listings"> Home</a>
-      <div class="navbar-nav me-auto">
-        <form class="d-flex align-items-center mx-3" role="search" action="/listings" method="get">
-        <input
-          class="form-control me-2"
-          type="search"
-          placeholder="Search stays"
-          aria-label="Search listings"
-          name="search"
-          value="<%= currentSearch || '' %>"
-        />
-        <input type="hidden" name="filter" value="<%= currentFilter || '' %>" />
-        <button class="btn btn-outline-dark" type="submit">Search</button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <form class="d-flex align-items-center mx-lg-4 my-2 my-lg-0 search-bar-form flex-grow-1 max-w-md" role="search" action="/listings" method="get">
+        <div class="input-group search-input-group">
+          <span class="input-group-text bg-transparent border-end-0 text-muted ps-3">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
+          <input
+            class="form-control border-start-0 ps-0 shadow-none"
+            type="search"
+            placeholder="Search stays, cities, mountains..."
+            aria-label="Search listings"
+            name="search"
+            value="<%= typeof currentSearch !== 'undefined' ? currentSearch : '' %>"
+          />
+          <input type="hidden" name="filter" value="<%= typeof currentFilter !== 'undefined' ? currentFilter : '' %>" />
+          <button class="btn btn-search px-3" type="submit">Search</button>
+        </div>
       </form>
-      
-      </div>
 
-      <div class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        <li class="nav-item">
+          <a class="nav-link" href="/listings">
+            <i class="fa-solid fa-globe me-1"></i> Explore
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/listings/new">
+            <i class="fa-solid fa-plus-circle me-1"></i> Add Stay
+          </a>
+        </li>
 
-        <a class="nav-link" href="/listings/new"> <i class="fa-solid fa-plus me-2"></i> Add listing</a>
-        <% if(! currentUser){ %>
-        <a class="nav-link" href="/users/register"><b>Register</b></a>
-        <a class="nav-link" href="/users/login"><b>Login</b></a>
+        <% if (currentUser) { %>
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="/bookings/dashboard">
+              <i class="fa-solid fa-calendar-check me-1"></i> Bookings & Chats
+            </a>
+          </li>
+          <li class="nav-item dropdown ms-lg-2">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1 user-avatar-badge" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-solid fa-user-circle fs-5"></i>
+              <span class="fw-semibold"><%= currentUser.username %></span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+              <li>
+                <a class="dropdown-item py-2" href="/bookings/dashboard">
+                  <i class="fa-solid fa-layer-group me-2 text-primary"></i> My Dashboard
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form action="/users/logout" method="POST" class="m-0 p-0">
+                  <button type="submit" class="dropdown-item py-2 text-danger">
+                    <i class="fa-solid fa-right-from-bracket me-2"></i> Log out
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </li>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link fw-semibold" href="/users/login">Log in</a>
+          </li>
+          <li class="nav-item ms-lg-1">
+            <a class="btn btn-brand-primary btn-sm px-3 rounded-pill" href="/users/register">Sign up</a>
+          </li>
         <% } %>
-         <% if(currentUser) { %>
-        <form action="/users/logout" method="POST" class="m-2 p-0">
-        <button type="submit" class="nav-link btn btn-link p-0 m-0"><b>Logout</b></button>
-        </form>
-         <% } %>
-      </div>
+      </ul>
     </div>
   </div>
 </nav>
+

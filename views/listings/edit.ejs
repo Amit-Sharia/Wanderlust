@@ -1,6 +1,6 @@
 <% layout("layouts/boilerplate.ejs") %>
 <%
-    const imageUrl = listed.image && listed.image.url ? listed.image.url : "";
+    const imagesList = (listed.images && listed.images.length > 0) ? listed.images : [{ url: (listed.image && listed.image.url ? listed.image.url : "") }];
 %>
 <script>
   const mapToken = <%- JSON.stringify(mapboxToken) %>;
@@ -8,25 +8,75 @@
   const mapContainerId = 'map-preview';
 </script>
 
-<section class="form-shell">
-    <h1>Edit listing</h1>
-    <form action="/listings/<%= listed._id %>?_method=PUT" method="post" class="listing-form needs-validation" novalidate enctype="multipart/form-data">
+<div class="row justify-content-center my-5">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+      <div class="mb-4">
+        <h2 class="fw-bold text-dark mb-1">Edit Stay Listing</h2>
+        <p class="text-muted">Update property details, photos, price, or location</p>
+      </div>
 
-        <input class="form-control" name="title" type="text" value="<%= listed.title || '' %>" required>
-
-        <textarea class="form-control" name="description" rows="4"><%= listed.description || "" %></textarea>
-        <% if (imageUrl) { %>
-            <img src="<%= imageUrl %>" class="listing-img mb-2" alt="<%= listed.title || 'Current listing image' %>">
-        <% } %>
-        <input class="form-control" name="image" type="file" accept="image/*">
-        <input class="form-control" name="price" type="number" min="0" value="<%= listed.price || '' %>">
-        <input class="form-control" name="location" type="text" value="<%= listed.location || '' %>">
-        <input class="form-control" name="country" type="text" value="<%= listed.country || '' %>">
-        <div class="mt-4">
-            <h5>Location preview</h5>
-            <div id="map-preview" style="min-height: 260px; border-radius: 0.75rem; overflow: hidden; background: #f3f3f3;"></div>
+      <form action="/listings/<%= listed._id %>?_method=PUT" method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="title" class="form-label fw-semibold text-secondary">Title</label>
+          <input class="form-control rounded-3 py-2" id="title" name="title" type="text" value="<%= listed.title || '' %>" required />
         </div>
-        <button class="btn btn-dark">Save changes</button>
-    </form>
-    <script src="/js/map.js"></script>
-</section>
+
+        <div class="mb-3">
+          <label for="description" class="form-label fw-semibold text-secondary">Description</label>
+          <textarea class="form-control rounded-3" id="description" name="description" rows="4" required><%= listed.description || "" %></textarea>
+        </div>
+
+        <!-- Current Images Preview -->
+        <% if (imagesList.length > 0 && imagesList[0].url) { %>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary d-block">Current Photos</label>
+            <div class="d-flex gap-2 flex-wrap">
+              <% imagesList.forEach(img => { %>
+                <% if (img.url) { %>
+                  <img src="<%= img.url %>" class="rounded-3 shadow-sm border" alt="Listing Image" style="width: 90px; height: 70px; object-fit: cover;">
+                <% } %>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+
+        <div class="mb-3">
+          <label for="images" class="form-label fw-semibold text-secondary">Upload New Photos (Replaces current images)</label>
+          <input class="form-control rounded-3" id="images" name="images" type="file" accept="image/*" multiple />
+          <small class="text-muted d-block mt-1">Upload up to 5 new photos to update your gallery</small>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <label for="price" class="form-label fw-semibold text-secondary">Price per night (₹)</label>
+            <input class="form-control rounded-3 py-2" id="price" name="price" type="number" min="0" value="<%= listed.price || '' %>" required />
+          </div>
+          <div class="col-md-4">
+            <label for="location" class="form-label fw-semibold text-secondary">Location / City</label>
+            <input class="form-control rounded-3 py-2" id="location" name="location" type="text" value="<%= listed.location || '' %>" required />
+          </div>
+          <div class="col-md-4">
+            <label for="country" class="form-label fw-semibold text-secondary">Country</label>
+            <input class="form-control rounded-3 py-2" id="country" name="country" type="text" value="<%= listed.country || '' %>" required />
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <h5 class="fw-semibold text-secondary mb-2">Location preview</h5>
+          <div id="map-preview" class="rounded-3 border" style="min-height: 240px; background: #f8fafc;"></div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-brand-primary px-4 py-2.5 rounded-3 fw-semibold" type="submit">
+            <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
+          </button>
+          <a href="/listings/<%= listed._id %>" class="btn btn-outline-secondary px-4 py-2.5 rounded-3">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="/js/map.js"></script>
+

@@ -1,13 +1,62 @@
 <% layout("layouts/boilerplate.ejs") %>
-<section class="form-shell">
-  <h1>Log in</h1>
 
-  <form action="/users/login" method="post" class="listing-form needs-validation" novalidate>
-    <input class="form-control" type="text" name="username" placeholder="Username" required />
-    <input class="form-control" type="password" name="password" placeholder="Password" required />
-    <button class="btn btn-dark mt-2" type="submit">Log in</button>
-  </form>
+<div class="row justify-content-center my-5">
+  <div class="col-md-6 col-lg-5">
+    <div class="card auth-card shadow-sm border-0 rounded-4 overflow-hidden">
+      <div class="card-body p-4 p-sm-5">
+        <div class="text-center mb-4">
+          <div class="auth-icon-badge mb-3">
+            <i class="fa-solid fa-right-to-bracket text-danger fs-3"></i>
+          </div>
+          <h2 class="fw-bold text-dark">Welcome Back</h2>
+          <p class="text-muted small">Log in to manage your stays and bookings</p>
+        </div>
 
-  <p class="mt-2">No account? <a href="/users/register">Register</a></p>
-</section>
+        <form action="/users/login" method="post" class="needs-validation" novalidate>
+          <div class="mb-3">
+            <label for="username" class="form-label small fw-semibold text-secondary">Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user text-muted"></i></span>
+              <input class="form-control border-start-0 bg-light" id="username" type="text" name="username" placeholder="Enter your username" required />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label small fw-semibold text-secondary">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
+              <input class="form-control border-start-0 bg-light" id="password" type="password" name="password" placeholder="••••••••" required />
+            </div>
+          </div>
+
+          <!-- Captcha Challenge -->
+          <div class="mb-4">
+            <label for="captcha" class="form-label small fw-semibold text-secondary">Security Verification</label>
+            <div class="d-flex align-items-center gap-3">
+              <img src="<%= typeof captchaSvg !== 'undefined' ? captchaSvg : '' %>" alt="Captcha" class="rounded border shadow-sm" height="42" />
+              <input class="form-control bg-light" id="captcha" type="text" name="captcha" placeholder="Enter answer" required />
+            </div>
+          </div>
+
+          <button class="btn btn-brand-primary w-100 py-2.5 fw-semibold rounded-3 mb-3" type="submit">Log in</button>
+        </form>
+
+        <div class="position-relative my-4 text-center">
+          <hr class="text-muted opacity-25" />
+          <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">or continue with</span>
+        </div>
+
+        <a href="/users/auth/google" class="btn btn-outline-secondary w-100 py-2 rounded-3 d-flex align-items-center justify-content-center gap-2">
+          <i class="fa-brands fa-google text-danger"></i> Continue with Google
+        </a>
+
+        <div class="text-center mt-4 pt-2 border-top">
+          <span class="text-muted small">Don't have an account?</span>
+          <a href="/users/register" class="fw-semibold text-danger text-decoration-none ms-1">Register now</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
