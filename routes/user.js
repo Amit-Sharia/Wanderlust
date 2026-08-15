@@ -29,13 +29,27 @@ router.get("/auth/google", (req, res, next) => {
 });
 
 router.get("/auth/google/callback", (req, res, next) => {
-  passport.authenticate("google", { failureRedirect: "/users/login", failureFlash: true })(req, res, () => {
-    req.flash("success", "Successfully logged in with Google!");
-    const redirectUrl = req.session?.redirectUrl || "/listings";
-    if (req.session) req.session.redirectUrl = null;
-    res.redirect(redirectUrl);
-  });
+  passport.authenticate("google", (err, user, info) => {
+    if (err) return next(err);
+    if (!user) {
+      req.flash("error", info?.message || "Google authentication failed. Please try again.");
+      return res.redirect("/users/login");
+    }
+
+    req.login(user, (loginErr) => {
+      if (loginErr) return next(loginErr);
+
+      req.session.save((saveErr) => {
+        if (saveErr) return next(saveErr);
+        req.flash("success", `Welcome back, ${user.username}!`);
+        const redirectUrl = req.session?.redirectUrl || "/listings";
+        if (req.session) req.session.redirectUrl = null;
+        return res.redirect(redirectUrl);
+      });
+    });
+  })(req, res, next);
 });
+
 
 
 
