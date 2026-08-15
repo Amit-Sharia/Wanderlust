@@ -24,7 +24,8 @@ const errorHandler = require("./middleware/errorHandler");
 // Flash + session
 const flash = require("connect-flash");
 const session = require("express-session");
-const MongoStore = require('connect-mongo');
+const { MongoStore } = require('connect-mongo');
+
 
 // Passport auth
 const passport = require("passport");
