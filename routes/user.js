@@ -22,17 +22,13 @@ router.get("/auth/google", (req, res, next) => {
   const gId = process.env.GOOGLE_CLIENT_ID;
   const gSec = process.env.GOOGLE_CLIENT_SECRET;
   if (!gId || !gSec || gId.includes("your-google") || gSec.includes("your-google")) {
-    return userController.google_demo_login(req, res, next);
+    req.flash("error", "Google Client ID & Secret must be set in .env or Render Environment tab.");
+    return res.redirect("/users/login");
   }
   passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
 });
 
 router.get("/auth/google/callback", (req, res, next) => {
-  const gId = process.env.GOOGLE_CLIENT_ID;
-  const gSec = process.env.GOOGLE_CLIENT_SECRET;
-  if (!gId || !gSec || gId.includes("your-google") || gSec.includes("your-google")) {
-    return userController.google_demo_login(req, res, next);
-  }
   passport.authenticate("google", { failureRedirect: "/users/login", failureFlash: true })(req, res, () => {
     req.flash("success", "Successfully logged in with Google!");
     const redirectUrl = req.session?.redirectUrl || "/listings";
@@ -40,6 +36,7 @@ router.get("/auth/google/callback", (req, res, next) => {
     res.redirect(redirectUrl);
   });
 });
+
 
 
 

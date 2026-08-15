@@ -1,6 +1,20 @@
 (() => {
   'use strict'
 
+  const pageLoader = document.getElementById('pageLoader')
+
+  const showLoader = () => {
+    if (pageLoader) pageLoader.classList.remove('d-none')
+  }
+
+  const hideLoader = () => {
+    if (pageLoader) pageLoader.classList.add('d-none')
+  }
+
+  // Hide loader on initial load and back/forward cache restore
+  window.addEventListener('pageshow', hideLoader)
+  window.addEventListener('DOMContentLoaded', hideLoader)
+
   // Fetch all forms with validation
   const forms = document.querySelectorAll('.needs-validation')
 
@@ -9,9 +23,30 @@
       if (!form.checkValidity()) {
         event.preventDefault()
         event.stopPropagation()
+      } else {
+        showLoader()
       }
       form.classList.add('was-validated')
     }, false)
+  })
+
+  // Show loader on form submission for non-needs-validation forms as well
+  const allForms = document.querySelectorAll('form:not(.needs-validation)')
+  allForms.forEach(form => {
+    form.addEventListener('submit', () => {
+      showLoader()
+    })
+  })
+
+  // Show loader on link navigation
+  document.addEventListener('click', e => {
+    const link = e.target.closest('a')
+    if (link && link.href && !link.href.includes('#') && !link.target && !link.hasAttribute('download') && !link.classList.contains('carousel-control-prev') && !link.classList.contains('carousel-control-next')) {
+      const url = new URL(link.href, window.location.href)
+      if (url.origin === window.location.origin) {
+        showLoader()
+      }
+    }
   })
 
   // Live Password Strength Meter
@@ -46,4 +81,5 @@
       }
     })
   }
-})()
+})()
+
