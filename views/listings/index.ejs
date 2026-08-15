@@ -1,14 +1,14 @@
 <% layout("layouts/boilerplate.ejs") %>
 <% const fallbackImage = "https://static.vecteezy.com/system/resources/thumbnails/057/068/323/small/single-fresh-red-strawberry-on-table-green-background-food-fruit-sweet-macro-juicy-plant-image-photo.jpg" %>
 
-<section class="listings-hero my-4 text-center text-md-start">
+<section class="listings-hero mt-1 mb-4 text-center text-md-start">
   <div class="row align-items-center">
     <div class="col-md-7">
-      <h1 class="display-5 fw-bold mb-2 text-dark">Find your next extraordinary stay</h1>
-      <p class="lead text-muted">Discover villas, beach houses, cabins, and iconic city stays worldwide.</p>
+      <h1 class="display-6 fw-bold mb-1 text-dark">Find your next extraordinary stay</h1>
+      <p class="text-muted mb-0">Discover villas, beach houses, cabins, and iconic city stays worldwide.</p>
     </div>
-    <div class="col-md-5 text-md-end mt-3 mt-md-0">
-      <div class="form-check form-switch d-inline-block p-2 bg-light rounded-pill border px-3">
+    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+      <div class="form-check form-switch d-inline-block p-2 bg-light rounded-pill border px-3 shadow-sm">
         <input class="form-check-input ms-0 me-2" type="checkbox" id="taxToggle" role="switch">
         <label class="form-check-label small fw-semibold text-dark" for="taxToggle">Display total before & after tax</label>
       </div>
@@ -16,7 +16,7 @@
   </div>
 
   <!-- Filter Pills -->
-  <div class="filters-scroll-container my-4">
+  <div class="filters-scroll-container mt-3 mb-2">
     <div class="d-flex gap-2 pb-2 overflow-x-auto text-nowrap">
       <a href="/listings" class="btn btn-filter <%= !currentFilter ? 'active' : '' %>">
         <i class="fa-solid fa-fire me-1 text-danger"></i> All Stays
@@ -41,7 +41,7 @@
 </section>
 
 <% if (!allListings || allListings.length === 0) { %>
-  <div class="card border-0 shadow-sm rounded-4 text-center py-5 my-4">
+  <div class="card border-0 shadow-sm rounded-4 text-center py-5 my-3">
     <div class="card-body">
       <i class="fa-solid fa-compass-drafting text-muted fs-1 mb-3"></i>
       <h3 class="fw-bold">No stays found</h3>
@@ -64,25 +64,29 @@
           <!-- Card Image / Carousel -->
           <div class="position-relative">
             <% if (listImages.length > 1) { %>
-              <div id="carouselListing<%= i %>" class="carousel slide" data-bs-ride="false">
+              <div id="carouselListing<%= i %>" class="carousel slide" data-bs-ride="false" data-bs-interval="false">
                 <div class="carousel-inner rounded-top-4">
                   <% listImages.forEach((img, idx) => { %>
                     <div class="carousel-item <%= idx === 0 ? 'active' : '' %>">
-                      <img src="<%= img.url %>" class="d-block w-100 listing-img" alt="<%= title %>" loading="lazy" style="height: 240px; object-fit: cover;">
+                      <a href="/listings/<%= listing._id %>">
+                        <img src="<%= img.url %>" class="d-block w-100 listing-img" alt="<%= title %>" loading="lazy" style="height: 240px; object-fit: cover;">
+                      </a>
                     </div>
                   <% }) %>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselListing<%= i %>" data-bs-slide="prev" onclick="event.preventDefault();">
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselListing<%= i %>" data-bs-slide="prev" onclick="event.preventDefault(); event.stopPropagation();">
                   <span class="carousel-control-prev-icon rounded-circle bg-dark bg-opacity-50 p-2" aria-hidden="true"></span>
                   <span class="visually-hidden">Previous</span>
                 </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#carouselListing<%= i %>" data-bs-slide="next" onclick="event.preventDefault();">
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselListing<%= i %>" data-bs-slide="next" onclick="event.preventDefault(); event.stopPropagation();">
                   <span class="carousel-control-next-icon rounded-circle bg-dark bg-opacity-50 p-2" aria-hidden="true"></span>
                   <span class="visually-hidden">Next</span>
                 </button>
               </div>
             <% } else { %>
-              <img src="<%= listImages[0].url %>" class="card-img-top listing-img rounded-top-4" alt="<%= title %>" loading="lazy" style="height: 240px; object-fit: cover;">
+              <a href="/listings/<%= listing._id %>">
+                <img src="<%= listImages[0].url %>" class="card-img-top listing-img rounded-top-4" alt="<%= title %>" loading="lazy" style="height: 240px; object-fit: cover;">
+              </a>
             <% } %>
 
             <!-- Status Badge -->
