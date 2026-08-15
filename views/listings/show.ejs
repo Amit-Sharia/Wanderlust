@@ -82,7 +82,8 @@
             <i class="fa-solid fa-user-astronaut fs-3 text-danger"></i>
             <div>
               <small class="text-muted d-block">Hosted by</small>
-              <strong class="fs-6 text-dark"><%= (listed.owner && listed.owner.username) ? listed.owner.username : "Wanderlust Host" %></strong>
+              <strong class="fs-6 text-dark"><%= (listed.owner && listed.owner.username && listed.owner.username !== 'wanderlust_demo') ? listed.owner.username : "Wanderlust Superhost" %></strong>
+
             </div>
           </div>
 

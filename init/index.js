@@ -41,11 +41,12 @@ const initDB = async () => {
   await Listing.deleteMany({});
 
   // Ensure a valid default seed user exists
-  let seedUser = await User.findOne({ username: "wanderlust_demo" });
+  let seedUser = await User.findOne({ username: "Wanderlust Superhost" });
   if (!seedUser) {
-    const demoUser = new User({ username: "wanderlust_demo", email: "demo@wanderlust.com" });
+    const demoUser = new User({ username: "Wanderlust Superhost", email: "host@wanderlust.com" });
     seedUser = await User.register(demoUser, "DemoPass123!");
   }
+
 
   const seededListings = [];
 
