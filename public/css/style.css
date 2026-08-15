@@ -114,7 +114,7 @@ body {
 .btn-filter {
     background: white;
     color: #475569;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #fecdd3;
     border-radius: 999px;
     padding: 0.5rem 1.25rem;
     font-weight: 600;
@@ -124,10 +124,68 @@ body {
 
 .btn-filter:hover,
 .btn-filter.active {
-    background: #0f172a;
-    color: white;
-    border-color: #0f172a;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+    background: var(--brand-primary) !important;
+    color: white !important;
+    border-color: var(--brand-primary) !important;
+    box-shadow: 0 4px 14px rgba(254, 66, 77, 0.3) !important;
+}
+
+/* Global Button Hover Overrides - No Black Hover, Always Reddish Tone */
+.btn-outline-dark {
+    border-color: #fecdd3 !important;
+    color: #475569 !important;
+    transition: all 0.25s ease !important;
+}
+
+.btn-outline-dark:hover,
+.btn-outline-dark:focus,
+.btn-outline-dark:active {
+    background-color: var(--brand-primary) !important;
+    border-color: var(--brand-primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(254, 66, 77, 0.3) !important;
+}
+
+.btn-outline-secondary {
+    border-color: #fecdd3 !important;
+    color: #475569 !important;
+    transition: all 0.25s ease !important;
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus,
+.btn-outline-secondary:active {
+    background-color: var(--brand-primary) !important;
+    border-color: var(--brand-primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(254, 66, 77, 0.3) !important;
+}
+
+.btn-secondary {
+    background-color: #fda4af !important;
+    border-color: #fda4af !important;
+    color: #881337 !important;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: var(--brand-primary) !important;
+    border-color: var(--brand-primary) !important;
+    color: #ffffff !important;
+}
+
+.btn-dark {
+    background-color: var(--brand-primary) !important;
+    border-color: var(--brand-primary) !important;
+    color: #ffffff !important;
+}
+
+.btn-dark:hover,
+.btn-dark:focus {
+    background-color: var(--brand-primary-hover) !important;
+    border-color: var(--brand-primary-hover) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(254, 66, 77, 0.3) !important;
 }
 
 /* Cards & Listing Layout */
@@ -288,6 +346,130 @@ body {
 .spin-pulse {
     animation: spinPulse 1.3s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
 }
+
+/* WhatsApp Red & White Chat UI Styles */
+.whatsapp-chat-card {
+    border-radius: 1.25rem !important;
+    border: 1px solid #fecdd3 !important;
+    box-shadow: 0 12px 36px rgba(225, 29, 72, 0.08) !important;
+    overflow: hidden;
+}
+
+.whatsapp-chat-header {
+    background: linear-gradient(135deg, #e11d48 0%, #fe424d 100%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 1rem 1.25rem;
+}
+
+.whatsapp-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #e11d48;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.whatsapp-back-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.whatsapp-back-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+    color: white;
+    transform: translateX(-2px);
+}
+
+.whatsapp-chat-bg {
+    background-color: #fff7f8 !important;
+    background-image: radial-gradient(#fecdd3 0.65px, transparent 0.65px);
+    background-size: 16px 16px;
+}
+
+.whatsapp-bubble-mine {
+    background: linear-gradient(135deg, #e11d48 0%, #fe424d 100%) !important;
+    color: #ffffff !important;
+    border-radius: 18px 18px 4px 18px !important;
+    box-shadow: 0 3px 10px rgba(225, 29, 72, 0.18) !important;
+    position: relative;
+}
+
+.whatsapp-bubble-other {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #fecdd3 !important;
+    border-radius: 18px 18px 18px 4px !important;
+    box-shadow: 0 3px 10px rgba(225, 29, 72, 0.05) !important;
+    position: relative;
+}
+
+.whatsapp-input-pill {
+    background: #ffffff !important;
+    border: 1.5px solid #fecdd3 !important;
+    border-radius: 9999px !important;
+    padding: 0.35rem 0.5rem 0.35rem 1.25rem;
+    box-shadow: 0 4px 14px rgba(225, 29, 72, 0.06);
+    transition: all 0.25s ease;
+}
+
+.whatsapp-input-pill:focus-within {
+    border-color: #e11d48 !important;
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+}
+
+.whatsapp-send-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e11d48 0%, #fe424d 100%) !important;
+    color: white !important;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.whatsapp-send-btn:hover:not(:disabled) {
+    transform: scale(1.06);
+    box-shadow: 0 6px 16px rgba(225, 29, 72, 0.4);
+}
+
+.date-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.date-divider span {
+    background: #ffffff;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid #fecdd3;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
 
 
 
