@@ -15,11 +15,23 @@
   window.addEventListener('pageshow', hideLoader)
   window.addEventListener('DOMContentLoaded', hideLoader)
 
+  // Expose loader functions globally
+  window.showLoader = showLoader
+  window.hideLoader = hideLoader
+
   // Fetch all forms with validation
   const forms = document.querySelectorAll('.needs-validation')
 
   Array.from(forms).forEach(form => {
     form.addEventListener('submit', event => {
+      if (form.hasAttribute('data-no-loader') || form.classList.contains('no-loader')) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+        return
+      }
       if (!form.checkValidity()) {
         event.preventDefault()
         event.stopPropagation()
@@ -34,6 +46,9 @@
   const allForms = document.querySelectorAll('form:not(.needs-validation)')
   allForms.forEach(form => {
     form.addEventListener('submit', () => {
+      if (form.hasAttribute('data-no-loader') || form.classList.contains('no-loader')) {
+        return
+      }
       showLoader()
     })
   })

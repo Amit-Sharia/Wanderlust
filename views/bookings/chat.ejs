@@ -54,7 +54,7 @@
 
         <!-- Chat Footer Input -->
         <div class="card-footer bg-white p-3 border-top">
-          <form action="/bookings/<%= booking._id %>/chat" method="POST" class="d-flex gap-2" id="chatForm">
+          <form action="/bookings/<%= booking._id %>/chat" method="POST" class="d-flex gap-2 no-loader" id="chatForm" data-no-loader="true">
             <input
               type="text"
               name="text"
@@ -168,6 +168,8 @@
     // Async message submission (No full page refresh)
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (window.hideLoader) window.hideLoader();
+
       const text = input.value.trim();
       if (!text) return;
 
@@ -192,6 +194,7 @@
         console.error("Failed to send message:", err);
       } finally {
         sendBtn.disabled = false;
+        if (window.hideLoader) window.hideLoader();
         input.focus();
       }
     });
