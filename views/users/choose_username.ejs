@@ -1,0 +1,117 @@
+<% layout("layouts/boilerplate.ejs") %>
+
+<div class="row justify-content-center my-5">
+  <div class="col-md-6 col-lg-5">
+    <div class="card auth-card shadow-sm border-0 rounded-4 overflow-hidden">
+      <div class="card-body p-4 p-sm-5">
+        <div class="text-center mb-4">
+          <div class="auth-icon-badge mb-3 bg-light text-danger d-inline-flex align-items-center justify-content-center rounded-circle p-3 shadow-sm">
+            <i class="fa-brands fa-google fs-2 text-danger"></i>
+          </div>
+          <h2 class="fw-bold text-dark">Choose Your Username</h2>
+          <p class="text-muted small">You are signing in with Google</p>
+          <div class="alert alert-light border rounded-3 py-2 px-3 d-inline-flex align-items-center gap-2 mb-0">
+            <i class="fa-solid fa-envelope text-muted"></i>
+            <span class="fw-semibold text-secondary small"><%= email %></span>
+          </div>
+        </div>
+
+        <p class="text-secondary small mb-3 text-center">
+          Pick a unique username for your Wanderlust profile. This will be visible on your bookings and reviews.
+        </p>
+
+        <form action="/users/google/choose-username" method="post" class="needs-validation" novalidate id="chooseUsernameForm">
+          <div class="mb-4">
+            <label for="username" class="form-label small fw-semibold text-secondary">Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-at text-muted"></i></span>
+              <input 
+                class="form-control border-start-0 bg-light" 
+                id="usernameInput" 
+                type="text" 
+                name="username" 
+                value="<%= typeof suggestedUsername !== 'undefined' ? suggestedUsername : '' %>"
+                placeholder="e.g. wanderer_john" 
+                required 
+                minlength="3"
+                pattern="^[a-zA-Z0-9_]+$"
+                autocomplete="off"
+              />
+            </div>
+            <div id="usernameStatus" class="mt-2 small"></div>
+            <div class="form-text text-muted micro-text mt-1">
+              Must be at least 3 characters. Only letters, numbers, and underscores allowed.
+            </div>
+          </div>
+
+          <button class="btn btn-brand-primary w-100 py-2.5 fw-semibold rounded-3 mb-3" type="submit" id="submitBtn">
+            <i class="fa-solid fa-check-circle me-1"></i> Set Username & Continue
+          </button>
+        </form>
+
+        <div class="text-center mt-3 pt-3 border-top">
+          <a href="/users/login" class="text-muted small text-decoration-none">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Login
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("usernameInput");
+    const statusDiv = document.getElementById("usernameStatus");
+    const submitBtn = document.getElementById("submitBtn");
+    let timeout = null;
+
+    async function checkAvailability() {
+      const val = input.value.trim();
+      if (!val) {
+        statusDiv.className = "mt-2 small text-muted";
+        statusDiv.innerHTML = "";
+        return;
+      }
+      if (val.length < 3) {
+        statusDiv.className = "mt-2 small text-warning";
+        statusDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Username must be at least 3 characters.';
+        return;
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(val)) {
+        statusDiv.className = "mt-2 small text-danger";
+        statusDiv.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i> Only letters, numbers, and underscores allowed.';
+        return;
+      }
+
+      statusDiv.className = "mt-2 small text-secondary";
+      statusDiv.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Checking availability...';
+
+      try {
+        const res = await fetch(`/users/check-username?username=${encodeURIComponent(val)}`);
+        const data = await res.json();
+
+        if (data.available) {
+          statusDiv.className = "mt-2 small text-success fw-semibold";
+          statusDiv.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> ${data.message}`;
+          submitBtn.disabled = false;
+        } else {
+          statusDiv.className = "mt-2 small text-danger fw-semibold";
+          statusDiv.innerHTML = `<i class="fa-solid fa-circle-xmark me-1"></i> ${data.message}`;
+        }
+      } catch (err) {
+        statusDiv.className = "mt-2 small text-muted";
+        statusDiv.innerHTML = "";
+      }
+    }
+
+    input.addEventListener("input", () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(checkAvailability, 300);
+    });
+
+    if (input.value) {
+      checkAvailability();
+    }
+  });
+</script>

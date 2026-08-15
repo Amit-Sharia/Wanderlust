@@ -91,12 +91,17 @@ if (googleClientId && googleClientSecret && !googleClientId.includes("your-googl
               user.googleId = profile.id;
               await user.save();
             } else {
-              user = new User({
-                username: (profile.displayName || "user").replace(/\s+/g, "_").toLowerCase() + "_" + Math.floor(Math.random() * 1000),
-                email,
-                googleId: profile.id,
+              const suggestedUsername = (profile.displayName || "user")
+                .trim()
+                .replace(/[^a-zA-Z0-9_]/g, "_")
+                .toLowerCase();
+              return done(null, false, {
+                pendingGoogle: {
+                  googleId: profile.id,
+                  email,
+                  suggestedUsername,
+                },
               });
-              await user.save();
             }
           }
           return done(null, user);

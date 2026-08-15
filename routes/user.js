@@ -17,6 +17,14 @@ router.route("/login")
 .get(userController.login_get)
 .post(userController.login_post);
 
+// Check username availability
+router.get("/check-username", userController.checkUsername);
+
+// Google Choose Username
+router.route("/google/choose-username")
+.get(userController.renderChooseUsername)
+.post(userController.processChooseUsername);
+
 // Google OAuth
 router.get("/auth/google", (req, res, next) => {
   const gId = (process.env.GOOGLE_CLIENT_ID || "").trim();
@@ -33,6 +41,11 @@ router.get("/auth/google/callback", (req, res, next) => {
   passport.authenticate("google", (err, user, info) => {
     if (err) return next(err);
     if (!user) {
+      if (info && info.pendingGoogle) {
+        req.session.pendingGoogle = info.pendingGoogle;
+        req.flash("info", "Please choose a username to complete your Google Sign-In.");
+        return res.redirect("/users/google/choose-username");
+      }
       req.flash("error", info?.message || "Google authentication failed. Please try again.");
       return res.redirect("/users/login");
     }
@@ -42,7 +55,7 @@ router.get("/auth/google/callback", (req, res, next) => {
 
       req.session.save((saveErr) => {
         if (saveErr) return next(saveErr);
-        req.flash("success", `Welcome back, ${user.username}!`);
+        req.flash("success", `Welcome back, @${user.username}!`);
         const redirectUrl = req.session?.redirectUrl || "/listings";
         if (req.session) req.session.redirectUrl = null;
         return res.redirect(redirectUrl);
@@ -50,10 +63,6 @@ router.get("/auth/google/callback", (req, res, next) => {
     });
   })(req, res, next);
 });
-
-
-
-
 
 // Logout
 router.post("/logout", userController.logout);

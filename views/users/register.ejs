@@ -17,8 +17,20 @@
             <label for="username" class="form-label small fw-semibold text-secondary">Username</label>
             <div class="input-group">
               <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-at text-muted"></i></span>
-              <input class="form-control border-start-0 bg-light" id="username" type="text" name="username" placeholder="johndoe" required />
+              <input 
+                class="form-control border-start-0 bg-light" 
+                id="username" 
+                type="text" 
+                name="username" 
+                placeholder="johndoe" 
+                required 
+                minlength="3"
+                pattern="^[a-zA-Z0-9_]+$"
+                autocomplete="off"
+              />
             </div>
+            <div id="usernameStatus" class="mt-2 small"></div>
+            <small class="text-muted d-block mt-1">Your unique handle on Wanderlust for your profile, bookings, and host listings.</small>
           </div>
 
           <div class="mb-3">
@@ -53,7 +65,7 @@
             </div>
           </div>
 
-          <button class="btn btn-brand-primary w-100 py-2.5 fw-semibold rounded-3 mb-3" type="submit">Create Account</button>
+          <button class="btn btn-brand-primary w-100 py-2.5 fw-semibold rounded-3 mb-3" type="submit" id="submitBtn">Create Account</button>
         </form>
 
         <div class="position-relative my-4 text-center">
@@ -73,5 +85,61 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("username");
+    const statusDiv = document.getElementById("usernameStatus");
+    let timeout = null;
+
+    async function checkAvailability() {
+      const val = input.value.trim();
+      if (!val) {
+        statusDiv.className = "mt-2 small text-muted";
+        statusDiv.innerHTML = "";
+        return;
+      }
+      if (val.length < 3) {
+        statusDiv.className = "mt-2 small text-warning";
+        statusDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Username must be at least 3 characters.';
+        return;
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(val)) {
+        statusDiv.className = "mt-2 small text-danger";
+        statusDiv.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i> Only letters, numbers, and underscores allowed.';
+        return;
+      }
+
+      statusDiv.className = "mt-2 small text-secondary";
+      statusDiv.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Checking availability...';
+
+      try {
+        const res = await fetch(`/users/check-username?username=${encodeURIComponent(val)}`);
+        const data = await res.json();
+
+        if (data.available) {
+          statusDiv.className = "mt-2 small text-success fw-semibold";
+          statusDiv.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> ${data.message}`;
+        } else {
+          statusDiv.className = "mt-2 small text-danger fw-semibold";
+          statusDiv.innerHTML = `<i class="fa-solid fa-circle-xmark me-1"></i> ${data.message}`;
+        }
+      } catch (err) {
+        statusDiv.className = "mt-2 small text-muted";
+        statusDiv.innerHTML = "";
+      }
+    }
+
+    input.addEventListener("input", () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(checkAvailability, 300);
+    });
+
+    if (input.value) {
+      checkAvailability();
+    }
+  });
+</script>
+
 
 
