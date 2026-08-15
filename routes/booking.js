@@ -17,6 +17,7 @@ router.patch("/:id/cancel", isLoggedIn, asyncHandler(bookingController.cancel));
 
 // Chat endpoints
 router.get("/:id/chat", isLoggedIn, asyncHandler(bookingController.getChat));
+router.get("/:id/messages/json", isLoggedIn, asyncHandler(bookingController.getMessagesJson));
 router.post("/:id/chat", isLoggedIn, asyncHandler(bookingController.postMessage));
 
 module.exports = router;

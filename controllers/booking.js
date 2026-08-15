@@ -170,6 +170,27 @@ module.exports.getChat = async (req, res) => {
   res.render("bookings/chat.ejs", { booking, messages });
 };
 
+// JSON API endpoint for real-time messages polling
+module.exports.getMessagesJson = async (req, res) => {
+  const { id } = req.params;
+  const booking = await Booking.findById(id);
+  if (!booking || booking.status !== "approved") {
+    return res.status(404).json({ success: false, message: "Chat unavailable." });
+  }
+
+  const isRenter = booking.renter.equals(req.user._id);
+  const isOwner = booking.owner.equals(req.user._id);
+  if (!isRenter && !isOwner) {
+    return res.status(403).json({ success: false, message: "Unauthorized." });
+  }
+
+  const messages = await Message.find({ booking: booking._id })
+    .populate("sender", "username")
+    .sort({ createdAt: 1 });
+
+  return res.json({ success: true, messages });
+};
+
 // Post a chat message
 module.exports.postMessage = async (req, res) => {
   const { id } = req.params;
@@ -177,6 +198,8 @@ module.exports.postMessage = async (req, res) => {
 
   const booking = await Booking.findById(id);
   if (!booking || booking.status !== "approved") {
+    const isJson = req.xhr || (req.headers.accept && req.headers.accept.includes("application/json")) || req.query.json === "true";
+    if (isJson) return res.status(400).json({ success: false, message: "Chat unavailable." });
     req.flash("error", "Chat unavailable.");
     return res.redirect("/bookings/dashboard");
   }
@@ -185,11 +208,15 @@ module.exports.postMessage = async (req, res) => {
   const isOwner = booking.owner.equals(req.user._id);
 
   if (!isRenter && !isOwner) {
+    const isJson = req.xhr || (req.headers.accept && req.headers.accept.includes("application/json")) || req.query.json === "true";
+    if (isJson) return res.status(403).json({ success: false, message: "Unauthorized." });
     req.flash("error", "Unauthorized.");
     return res.redirect("/bookings/dashboard");
   }
 
   if (!text || !text.trim()) {
+    const isJson = req.xhr || (req.headers.accept && req.headers.accept.includes("application/json")) || req.query.json === "true";
+    if (isJson) return res.status(400).json({ success: false, message: "Message text cannot be empty." });
     return res.redirect(`/bookings/${id}/chat`);
   }
 
@@ -202,5 +229,12 @@ module.exports.postMessage = async (req, res) => {
   });
 
   await message.save();
+  await message.populate("sender", "username");
+
+  const isJson = req.xhr || (req.headers.accept && req.headers.accept.includes("application/json")) || req.query.json === "true";
+  if (isJson) {
+    return res.json({ success: true, message });
+  }
+
   res.redirect(`/bookings/${id}/chat`);
 };

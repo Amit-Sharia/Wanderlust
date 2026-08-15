@@ -17,49 +17,54 @@
               </small>
             </div>
           </div>
-          <span class="badge bg-white text-danger rounded-pill px-3 py-2 fw-semibold">BOOKED MODE</span>
+          <span class="badge bg-white text-danger rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-1">
+            <span class="spinner-grow spinner-grow-sm text-danger" role="status" style="width: 8px; height: 8px;"></span>
+            LIVE CHAT
+          </span>
         </div>
 
         <!-- Chat Body -->
-        <div class="card-body p-4 bg-rose-tint chat-messages-box" style="height: 420px; overflow-y: auto;">
-          <% if (!messages || messages.length === 0) { %>
-            <div class="text-center text-muted my-5">
-              <i class="fa-solid fa-comments fs-1 opacity-50 mb-2 text-danger"></i>
-              <p class="mb-0">No messages yet. Start the conversation!</p>
-            </div>
-          <% } else { %>
-            <% for (let m of messages) { %>
-              <% const isMine = m.sender && currentUser._id.equals(m.sender._id); %>
-              <div class="d-flex mb-3 <%= isMine ? 'justify-content-end' : 'justify-content-start' %>">
-                <div class="chat-bubble p-3 rounded-4 shadow-sm max-w-75 <%= isMine ? 'bg-danger text-white' : 'bg-white text-dark border border-rose-light' %>">
-                  <div class="d-flex align-items-center gap-2 mb-1">
-                    <strong class="small <%= isMine ? 'text-white-50' : 'text-danger' %>">
-                      <%= m.sender ? m.sender.username : 'User' %>
-                    </strong>
-                    <span class="small opacity-50 text-nowrap" style="font-size: 0.75rem;">
-                      <%= new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
-                    </span>
-                  </div>
-                  <p class="mb-0 text-break"><%= m.text %></p>
-                </div>
+        <div class="card-body p-4 bg-rose-tint chat-messages-box" id="chatMessagesBox" style="height: 420px; overflow-y: auto;">
+          <div id="messagesContainer">
+            <% if (!messages || messages.length === 0) { %>
+              <div class="text-center text-muted my-5" id="noMessagesPlaceholder">
+                <i class="fa-solid fa-comments fs-1 opacity-50 mb-2 text-danger"></i>
+                <p class="mb-0">No messages yet. Start the conversation!</p>
               </div>
-
+            <% } else { %>
+              <% for (let m of messages) { %>
+                <% const isMine = m.sender && currentUser._id.equals(m.sender._id); %>
+                <div class="d-flex mb-3 <%= isMine ? 'justify-content-end' : 'justify-content-start' %> message-row" data-msg-id="<%= m._id %>">
+                  <div class="chat-bubble p-3 rounded-4 shadow-sm max-w-75 <%= isMine ? 'bg-danger text-white' : 'bg-white text-dark border border-rose-light' %>">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <strong class="small <%= isMine ? 'text-white-50' : 'text-danger' %>">
+                        <%= m.sender ? m.sender.username : 'User' %>
+                      </strong>
+                      <span class="small opacity-50 text-nowrap msg-timestamp" style="font-size: 0.75rem;" data-created-at="<%= m.createdAt %>">
+                        <!-- Formatted by client JS -->
+                      </span>
+                    </div>
+                    <p class="mb-0 text-break"><%= m.text %></p>
+                  </div>
+                </div>
+              <% } %>
             <% } %>
-          <% } %>
+          </div>
         </div>
 
         <!-- Chat Footer Input -->
         <div class="card-footer bg-white p-3 border-top">
-          <form action="/bookings/<%= booking._id %>/chat" method="POST" class="d-flex gap-2">
+          <form action="/bookings/<%= booking._id %>/chat" method="POST" class="d-flex gap-2" id="chatForm">
             <input
               type="text"
               name="text"
+              id="messageInput"
               class="form-control rounded-pill border-2 px-3 shadow-none"
               placeholder="Type your message..."
               required
               autocomplete="off"
             />
-            <button type="submit" class="btn btn-brand-primary rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 46px; height: 46px;">
+            <button type="submit" id="sendBtn" class="btn btn-brand-primary rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 46px; height: 46px;">
               <i class="fa-solid fa-paper-plane"></i>
             </button>
           </form>
@@ -70,9 +75,150 @@
 </div>
 
 <script>
-  // Auto scroll chat box to bottom
   document.addEventListener("DOMContentLoaded", () => {
-    const box = document.querySelector(".chat-messages-box");
-    if (box) box.scrollTop = box.scrollHeight;
+    const currentUserId = "<%= currentUser._id %>";
+    const bookingId = "<%= booking._id %>";
+    const box = document.getElementById("chatMessagesBox");
+    const container = document.getElementById("messagesContainer");
+    const form = document.getElementById("chatForm");
+    const input = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    const existingIds = new Set();
+
+    // Helper to format ISO date into user's local timezone (12-hour AM/PM format)
+    function formatLocalTime(dateStr) {
+      if (!dateStr) return "";
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return "";
+
+      const now = new Date();
+      const isToday = d.toDateString() === now.toDateString();
+
+      const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+      if (isToday) {
+        return timeStr;
+      }
+      const dateStrFormatted = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      return `${dateStrFormatted}, ${timeStr}`;
+    }
+
+    // Format all initial timestamps
+    document.querySelectorAll(".msg-timestamp").forEach((el) => {
+      const createdAt = el.getAttribute("data-created-at");
+      if (createdAt) {
+        el.textContent = formatLocalTime(createdAt);
+      }
+    });
+
+    // Collect initial message IDs
+    document.querySelectorAll(".message-row").forEach((el) => {
+      const id = el.getAttribute("data-msg-id");
+      if (id) existingIds.add(id);
+    });
+
+    // Auto scroll to bottom
+    function scrollToBottom() {
+      if (box) {
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+    scrollToBottom();
+
+    // Render a new message bubble
+    function appendMessageBubble(m) {
+      if (existingIds.has(m._id)) return;
+      existingIds.add(m._id);
+
+      const placeholder = document.getElementById("noMessagesPlaceholder");
+      if (placeholder) placeholder.remove();
+
+      const isMine = m.sender && (m.sender._id === currentUserId || m.sender === currentUserId);
+      const senderName = m.sender ? (m.sender.username || 'User') : 'User';
+      const formattedTime = formatLocalTime(m.createdAt);
+
+      const wrapper = document.createElement("div");
+      wrapper.className = `d-flex mb-3 ${isMine ? 'justify-content-end' : 'justify-content-start'} message-row`;
+      wrapper.setAttribute("data-msg-id", m._id);
+
+      wrapper.innerHTML = `
+        <div class="chat-bubble p-3 rounded-4 shadow-sm max-w-75 ${isMine ? 'bg-danger text-white' : 'bg-white text-dark border border-rose-light'}">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <strong class="small ${isMine ? 'text-white-50' : 'text-danger'}">
+              ${senderName}
+            </strong>
+            <span class="small opacity-50 text-nowrap msg-timestamp" style="font-size: 0.75rem;">
+              ${formattedTime}
+            </span>
+          </div>
+          <p class="mb-0 text-break">${escapeHtml(m.text)}</p>
+        </div>
+      `;
+
+      container.appendChild(wrapper);
+      scrollToBottom();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Async message submission (No full page refresh)
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = "";
+      sendBtn.disabled = true;
+
+      try {
+        const res = await fetch(`/bookings/${bookingId}/chat?json=true`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await res.json();
+        if (data.success && data.message) {
+          appendMessageBubble(data.message);
+        }
+      } catch (err) {
+        console.error("Failed to send message:", err);
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    });
+
+    // Real-time polling every 2 seconds for new incoming messages
+    async function pollMessages() {
+      try {
+        const res = await fetch(`/bookings/${bookingId}/messages/json`, {
+          headers: { "Accept": "application/json" }
+        });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (data.success && Array.isArray(data.messages)) {
+          let hasNew = false;
+          for (const m of data.messages) {
+            if (!existingIds.has(m._id)) {
+              appendMessageBubble(m);
+              hasNew = true;
+            }
+          }
+        }
+      } catch (err) {
+        // Silent error handling for background polling
+      }
+    }
+
+    setInterval(pollMessages, 2000);
   });
 </script>
