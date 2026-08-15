@@ -10,8 +10,9 @@ const express = require("express");
 const app = express();
 
 const mongoose = require("mongoose");
-// const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 const CloudDB = process.env.AtlasDB_URL || process.env.ATLASDB_URL;
+const dbUrl = CloudDB || "mongodb://127.0.0.1:27017/wanderlust";
+const sessionSecret = process.env.SESSION_SECRET || "changeMeToASecretInProduction";
 
 // Utilities / Middleware
 const path = require("path");
@@ -23,15 +24,17 @@ const errorHandler = require("./middleware/errorHandler");
 // Flash + session
 const flash = require("connect-flash");
 const session = require("express-session");
-// Mongo session store
-const { MongoStore } = require('connect-mongo');
+const MongoStore = require('connect-mongo');
 
 // Passport auth
 const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("./models/user.js");
 
-const dbUrl = CloudDB || "mongodb://127.0.0.1:27017/wanderlust";
-const sessionSecret = process.env.SESSION_SECRET || "changeMeToASecretInProduction";
+// Body Parsers & Static Assets (Mount Early)
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(methodOverride("_method"));
 
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
@@ -65,6 +68,42 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(User.createStrategy());
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: "/users/auth/google/callback",
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          let user = await User.findOne({ googleId: profile.id });
+          if (!user) {
+            const email = profile.emails && profile.emails[0] ? profile.emails[0].value : `${profile.id}@google.com`;
+            user = await User.findOne({ email });
+            if (user) {
+              user.googleId = profile.id;
+              await user.save();
+            } else {
+              user = new User({
+                username: profile.displayName.replace(/\s+/g, "_").toLowerCase() + "_" + Math.floor(Math.random() * 1000),
+                email,
+                googleId: profile.id,
+              });
+              await user.save();
+            }
+          }
+          return done(null, user);
+        } catch (err) {
+          return done(err, null);
+        }
+      }
+    )
+  );
+}
+
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
@@ -80,14 +119,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"));
-
 // Routers
 const listingsRouter = require("./routes/listing.js");
 const reviewsRouter = require("./routes/reviews.js");
 const userRouter = require("./routes/user.js");
-
+const bookingRouter = require("./routes/booking.js");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -99,21 +135,22 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.use("/listings", listingsRouter);
 app.use("/listings", reviewsRouter);
 app.use("/users", userRouter);
+app.use("/bookings", bookingRouter);
 
 /*********************************
  * DB Connection
  *********************************/
 async function main() {
-  // Disable strict populate (prevents errors when populate paths don’t match schema exactly)
   mongoose.set("strictPopulate", false);
-  await mongoose.connect(CloudDB);
+  await mongoose.connect(dbUrl);
 }
 
 main()
   .then(() => {
-    console.log("db connected");
+    console.log("DB connected successfully");
   })
-  .catch((err) => console.log(err));
+  .catch((err) => console.log("DB connection error:", err));
+
 /*********************************
  * Routes
  *********************************/

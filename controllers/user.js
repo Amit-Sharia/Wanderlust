@@ -1,40 +1,55 @@
 const User = require("../models/user");
 const passport = require("passport");
+const { generateCaptcha } = require("../utils/captcha");
+
 
 module.exports.register_get = (req, res) => {
-  res.render("users/register.ejs");
+  const captcha = generateCaptcha();
+  req.session.captchaAnswer = captcha.answer;
+  res.render("users/register.ejs", { captchaSvg: captcha.svg });
 };
 
-module.exports.register_post =async (req, res, next) => {
-    try {
-      const { username, email, password } = req.body;
+module.exports.register_post = async (req, res, next) => {
+  try {
+    const { username, email, password, captcha } = req.body;
 
-      // passport-local-mongoose expects: username + password by default.
-      // If your form doesn't send username, update it to send username.
-      const user = new User({ username, email });
-      const registeredUser = await User.register(user, password);
-
-      req.login(registeredUser, (err) => {
-        if (err) return next(err);
-        req.flash("success", "Welcome to Wanderlust!");
-
-        const redirectUrl = req.session?.redirectUrl || "/listings";
-        if (req.session) req.session.redirectUrl = null;
-
-        res.redirect(redirectUrl);
-      });
-    } catch (err) {
-        req.flash("error",err.message);
-        res.redirect("/users/register");
+    if (!captcha || captcha.trim() !== String(req.session.captchaAnswer)) {
+      req.flash("error", "Incorrect Captcha answer. Please try again.");
+      return res.redirect("/users/register");
     }
-  };
 
+    const user = new User({ username, email });
+    const registeredUser = await User.register(user, password);
 
-module.exports.login_get =  (req, res) => {
-  res.render("users/login.ejs");
+    req.login(registeredUser, (err) => {
+      if (err) return next(err);
+      req.flash("success", "Welcome to Wanderlust!");
+
+      const redirectUrl = req.session?.redirectUrl || "/listings";
+      if (req.session) req.session.redirectUrl = null;
+
+      res.redirect(redirectUrl);
+    });
+  } catch (err) {
+    req.flash("error", err.message);
+    res.redirect("/users/register");
+  }
+};
+
+module.exports.login_get = (req, res) => {
+  const captcha = generateCaptcha();
+  req.session.captchaAnswer = captcha.answer;
+  res.render("users/login.ejs", { captchaSvg: captcha.svg });
 };
 
 module.exports.login_post = (req, res, next) => {
+  const { captcha } = req.body;
+
+  if (!captcha || captcha.trim() !== String(req.session.captchaAnswer)) {
+    req.flash("error", "Incorrect Captcha answer. Please try again.");
+    return res.redirect("/users/login");
+  }
+
   passport.authenticate("local", (err, user, info) => {
     if (err) return next(err);
 
@@ -62,3 +77,4 @@ module.exports.logout = (req, res, next) => {
     res.redirect("/listings");
   });
 };
+

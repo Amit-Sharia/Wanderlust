@@ -33,7 +33,7 @@ const buildImageData = (file) => {
   if (!file) return undefined;
 
   if (typeof file.path === "string" && file.path.startsWith("http")) {
-    return { url: file.path, filename: file.filename };
+    return { url: file.path, filename: file.filename || "listingimage" };
   }
 
   if (typeof file.path === "string") {
@@ -45,6 +45,17 @@ const buildImageData = (file) => {
   }
 
   return undefined;
+};
+
+const buildImagesArray = (req) => {
+  let images = [];
+  if (Array.isArray(req.files) && req.files.length > 0) {
+    images = req.files.map((file) => buildImageData(file)).filter(Boolean);
+  } else if (req.file) {
+    const img = buildImageData(req.file);
+    if (img) images.push(img);
+  }
+  return images;
 };
 
 const escapeRegExp = (value) =>
@@ -151,7 +162,7 @@ module.exports.index = async (req, res) => {
     query = {};
   }
 
-  const allListings = await Listing.find(query).sort(sort);
+  const allListings = await Listing.find(query).sort(sort).limit(50);
   res.render("listings/index.ejs", {
     allListings,
     currentFilter: filterKey,
@@ -167,8 +178,10 @@ module.exports.create = async (req, res) => {
     const newListing = new Listing(req.body.listing);
     newListing.owner = req.user._id;
 
-    if (req.file) {
-      newListing.image = buildImageData(req.file);
+    const uploadedImages = buildImagesArray(req);
+    if (uploadedImages.length > 0) {
+      newListing.images = uploadedImages;
+      newListing.image = uploadedImages[0];
     }
 
     const geometry = await geocodeLocation(req.body.listing.location, req.body.listing.country);
@@ -177,12 +190,11 @@ module.exports.create = async (req, res) => {
     }
 
     await newListing.save();
-    req.flash("success", "new listing created");
+    req.flash("success", "New stay listing created!");
     res.redirect("/listings");
   };
 
 module.exports.edit=async (req, res) => {
-    req.flash("success","listing edited");
     res.render("listings/edit.ejs", { listed: req.listed, mapboxToken: res.locals.mapboxToken });
   };
 
@@ -197,8 +209,10 @@ module.exports.update = async (req, res) => {
     }
 
     const updateData = { ...req.body.listing };
-    if (req.file) {
-      updateData.image = buildImageData(req.file);
+    const uploadedImages = buildImagesArray(req);
+    if (uploadedImages.length > 0) {
+      updateData.images = uploadedImages;
+      updateData.image = uploadedImages[0];
     }
 
     const geometry = await geocodeLocation(req.body.listing.location, req.body.listing.country);
@@ -211,6 +225,7 @@ module.exports.update = async (req, res) => {
       updateData,
       { runValidators: true, new: true }
     );
+
 
     if (!updatedListing) {
       return res.status(404).render("error", {

@@ -31,19 +31,30 @@ const geocodeLocation = async (location, country) => {
   };
 };
 
+const User = require("../models/user.js");
+
 async function main() {
   await mongoose.connect(MONGO_URL);
 }
-// remove the old data and add the new data from the data.js :)
+
 const initDB = async () => {
   await Listing.deleteMany({});
+
+  // Ensure a valid default seed user exists
+  let seedUser = await User.findOne({ username: "wanderlust_demo" });
+  if (!seedUser) {
+    const demoUser = new User({ username: "wanderlust_demo", email: "demo@wanderlust.com" });
+    seedUser = await User.register(demoUser, "DemoPass123!");
+  }
+
   const seededListings = [];
 
   for (const obj of initData.data) {
     const geometry = await geocodeLocation(obj.location, obj.country);
     const listing = {
       ...obj,
-      owner: "6a3c21e86015cbd7e8f2a876",
+      owner: seedUser._id,
+      images: obj.image?.url ? [{ url: obj.image.url, filename: obj.image.filename || "listingimage" }] : [],
     };
     if (geometry) {
       listing.geometry = geometry;
@@ -52,8 +63,9 @@ const initDB = async () => {
   }
 
   await Listing.insertMany(seededListings);
-  console.log("data was initialized");
+  console.log("Database seeded successfully with valid owner ID!");
 };
+
 
 main()
   .then(() => {

@@ -59,21 +59,21 @@ const normalizeListingBody = (req, res, next) => {
 
 
 router.route("/")
-  .get(asyncHandler(listingController.index))//read
-  .post(isLoggedIn,upload.single("image"),normalizeListingBody,validateListing,asyncHandler(listingController.create)); //create
-
+  .get(asyncHandler(listingController.index))
+  .post(isLoggedIn, upload.array("images", 5), normalizeListingBody, validateListing, asyncHandler(listingController.create));
 
 // Listings - New get 
-router.get("/new",isLoggedIn,listingController.new);
+router.get("/new", isLoggedIn, listingController.new);
 
 // Listings - Edit (form)
-router.get("/:id/edit",isLoggedIn,isOwner,validateIdAndListing,asyncHandler(listingController.edit));
+router.get("/:id/edit", isLoggedIn, isOwner, validateIdAndListing, asyncHandler(listingController.edit));
 
 // Listings - Update
 router.route("/:id")
-.put(isLoggedIn,isOwner,upload.single("image"),normalizeListingBody,validateListing,asyncHandler(listingController.update))// Listings - Delete
-.delete(isLoggedIn,isOwner,asyncHandler(listingController.delete))// Listings - Delete
-.get(validateIdAndListing,asyncHandler(listingController.read)) //Listings - Read (details)
+  .put(isLoggedIn, isOwner, upload.array("images", 5), normalizeListingBody, validateListing, asyncHandler(listingController.update))
+  .delete(isLoggedIn, isOwner, asyncHandler(listingController.delete))
+  .get(validateIdAndListing, asyncHandler(listingController.read));
+
 
 
 module.exports = router;

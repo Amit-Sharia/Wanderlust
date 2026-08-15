@@ -7,11 +7,10 @@ module.exports.read =async (req, res) => {
     res.render("listings/review.ejs", { listed: req.listed });
   };
 
-module.exports.create =async (req, res) => {
+module.exports.create = async (req, res) => {
     const { id } = req.params;
     const { review } = req.body;
 
-    // Extra safety (validateIdAndListing handles invalid ids)
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(404).render("error", {
         statusCode: 404,
@@ -19,18 +18,34 @@ module.exports.create =async (req, res) => {
       });
     }
 
-    // Create review document
-    const listing = await Listing.findById(id);
-    const newReview = new Review(review);
-    newReview.owner =req.user._id;
+    const listing = await Listing.findById(id).populate("reviews");
+    if (!listing) {
+      req.flash("error", "Listing not found.");
+      return res.redirect("/listings");
+    }
 
-    // Link + persist
+    // Check if user already submitted a review for this listing
+    const alreadyReviewed = listing.reviews.some(
+      (existingReview) =>
+        existingReview.owner && existingReview.owner.equals(req.user._id)
+    );
+
+    if (alreadyReviewed) {
+      req.flash("error", "You have already submitted a review for this stay.");
+      return res.redirect(`/listings/${id}`);
+    }
+
+    const newReview = new Review(review);
+    newReview.owner = req.user._id;
+
     listing.reviews.push(newReview);
     await newReview.save();
     await listing.save();
-    req.flash("success","new review created");
+
+    req.flash("success", "New review added successfully.");
     res.redirect(`/listings/${id}?review=1`);
   };
+
 
 module.exports.delete= async (req, res) => {
     const { id, reviewId } = req.params;
