@@ -19,14 +19,15 @@ router.route("/login")
 
 // Google OAuth
 router.get("/auth/google", (req, res, next) => {
-  const gId = process.env.GOOGLE_CLIENT_ID;
-  const gSec = process.env.GOOGLE_CLIENT_SECRET;
+  const gId = (process.env.GOOGLE_CLIENT_ID || "").trim();
+  const gSec = (process.env.GOOGLE_CLIENT_SECRET || "").trim();
   if (!gId || !gSec || gId.includes("your-google") || gSec.includes("your-google")) {
     req.flash("error", "Google Client ID & Secret must be set in .env or Render Environment tab.");
     return res.redirect("/users/login");
   }
   passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
 });
+
 
 router.get("/auth/google/callback", (req, res, next) => {
   passport.authenticate("google", (err, user, info) => {

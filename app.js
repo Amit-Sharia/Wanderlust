@@ -70,13 +70,16 @@ app.use(passport.session());
 
 passport.use(User.createStrategy());
 
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+const googleClientId = (process.env.GOOGLE_CLIENT_ID || "").trim();
+const googleClientSecret = (process.env.GOOGLE_CLIENT_SECRET || "").trim();
+
+if (googleClientId && googleClientSecret && !googleClientId.includes("your-google")) {
   passport.use(
     new GoogleStrategy(
       {
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "/users/auth/google/callback",
+        clientID: googleClientId,
+        clientSecret: googleClientSecret,
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || "/users/auth/google/callback",
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
@@ -89,7 +92,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               await user.save();
             } else {
               user = new User({
-                username: profile.displayName.replace(/\s+/g, "_").toLowerCase() + "_" + Math.floor(Math.random() * 1000),
+                username: (profile.displayName || "user").replace(/\s+/g, "_").toLowerCase() + "_" + Math.floor(Math.random() * 1000),
                 email,
                 googleId: profile.id,
               });
@@ -104,6 +107,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     )
   );
 }
+
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
