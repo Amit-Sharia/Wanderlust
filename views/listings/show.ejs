@@ -158,18 +158,20 @@
 
     <!-- Reviews Section -->
     <div class="mb-5">
-      <div class="d-flex align-items-center justify-content-between mb-4">
-        <h4 class="fw-bold mb-0">
-          <i class="fa-solid fa-star text-warning me-1"></i> Reviews (<%= listed.reviews ? listed.reviews.length : 0 %>)
+      <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <h4 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+          <i class="fa-solid fa-star text-danger"></i>
+          <span>Guest Reviews</span>
+          <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-1 fs-6"><%= listed.reviews ? listed.reviews.length : 0 %></span>
         </h4>
 
         <% if (currentUser && !isOwner) { %>
           <% if (userAlreadyReviewed) { %>
-            <span class="badge bg-secondary rounded-pill px-3 py-2">
-              <i class="fa-solid fa-circle-check me-1 text-success"></i> You reviewed this stay
+            <span class="badge bg-rose-tint text-danger border border-rose-light rounded-pill px-3 py-2">
+              <i class="fa-solid fa-circle-check me-1"></i> You reviewed this stay
             </span>
           <% } else { %>
-            <a href="/listings/<%= listed._id %>/reviews" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+            <a href="/listings/<%= listed._id %>/reviews" class="btn btn-brand-primary btn-sm rounded-pill px-4 shadow-sm">
               <i class="fa-solid fa-plus me-1"></i> Write a Review
             </a>
           <% } %>
@@ -177,24 +179,31 @@
       </div>
 
       <% if (!listed.reviews || listed.reviews.length === 0) { %>
-        <p class="text-muted">No reviews submitted yet.</p>
+        <div class="card border border-rose-light rounded-4 p-4 text-center bg-rose-tint">
+          <p class="text-muted mb-0"><i class="fa-regular fa-comment-dots fs-4 d-block mb-2 text-danger opacity-75"></i> No reviews submitted yet. Be the first to review!</p>
+        </div>
       <% } else { %>
         <div class="row g-3">
           <% for (let review of listed.reviews) { %>
             <div class="col-md-6">
-              <div class="card border-0 shadow-sm rounded-4 p-3.5 h-100 bg-white">
-                <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="card review-card p-3.5 h-100 d-flex flex-column">
+                <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2 border-bottom pb-2 border-rose-light">
                   <div class="d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-circle-user fs-4 text-secondary"></i>
-                    <strong class="text-dark small"><%= review.owner && review.owner.username ? review.owner.username : "Guest" %></strong>
+                    <div class="avatar-badge-red">
+                      <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                      <strong class="text-dark small d-block"><%= review.owner && review.owner.username ? review.owner.username : "Guest" %></strong>
+                      <span class="text-muted opacity-75" style="font-size: 0.75rem;"><%= new Date(review.createdAt || Date.now()).toLocaleDateString() %></span>
+                    </div>
                   </div>
-                  <span class="starability-result" data-rating="<%= review.rating %>"></span>
+                  <span class="starability-result scale-90" data-rating="<%= review.rating %>"></span>
                 </div>
-                <p class="text-secondary small mb-2"><%= review.comment %></p>
+                <p class="review-comment small mb-2 flex-grow-1"><%= review.comment %></p>
 
                 <% if (currentUser && review.owner && (review.owner._id ? currentUser._id.equals(review.owner._id) : currentUser._id.equals(review.owner))) { %>
-                  <form action="/listings/<%= listed._id %>/reviews/<%= review._id %>?_method=DELETE" method="post" class="mt-auto pt-2 text-end">
-                    <button type="submit" class="btn btn-link text-danger p-0 border-0 small text-decoration-none">
+                  <form action="/listings/<%= listed._id %>/reviews/<%= review._id %>?_method=DELETE" method="post" class="mt-auto pt-2 text-end border-top border-rose-light">
+                    <button type="submit" class="btn btn-link text-danger p-0 border-0 small text-decoration-none fw-semibold">
                       <i class="fa-solid fa-trash me-1"></i> Delete
                     </button>
                   </form>
@@ -205,6 +214,7 @@
         </div>
       <% } %>
     </div>
+
 
     <!-- Map Section -->
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">

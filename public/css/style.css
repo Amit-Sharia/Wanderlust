@@ -193,9 +193,54 @@ body {
     overflow: hidden;
 }
 
-@media (max-width: 768px) {
-    .max-w-75 {
-        max-width: 90%;
-    }
+/* Review Cards & Reddish Theme Styling */
+.review-card {
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    border: 1px solid #fecdd3 !important;
+    background: linear-gradient(180deg, #ffffff 0%, #fff1f2 100%) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 4px 14px rgba(225, 29, 72, 0.05);
+    transition: all 0.25s ease;
 }
+
+.review-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(225, 29, 72, 0.12) !important;
+    border-color: #fda4af !important;
+}
+
+.review-comment {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.bg-rose-tint {
+    background-color: #fff1f2 !important;
+}
+
+.border-rose-light {
+    border-color: #fecdd3 !important;
+}
+
+.avatar-badge-red {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #ffe4e6;
+    color: #e11d48;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.scale-90 {
+    transform: scale(0.9);
+    transform-origin: right center;
+}
+
 
